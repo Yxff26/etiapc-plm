@@ -1,3 +1,5 @@
+"use client";
+
 import type { Metadata } from "next";
 import {
   Activity,
@@ -24,12 +26,19 @@ import { Search } from "@/components/dashboard/search";
 import TeamSwitcher from "@/components/dashboard/team-switcher";
 import { UserNav } from "@/components/dashboard/user-nav";
 
-export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Teacher evaluation dashboard.",
-};
+import { useSession } from "next-auth/react";
+
+// export const metadata: Metadata = {
+//   title: "Dashboard",
+//   description: "Teacher evaluation dashboard.",
+// };
 
 export default function DashboardPage() {
+
+  const { data: session, status } = useSession();
+
+  console.log(session, status);
+
   return (
     <div className="flex min-h-screen flex-col">
       <div className="border-b">

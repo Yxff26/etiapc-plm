@@ -15,7 +15,7 @@ const containerVariants = {
   exit: { opacity: 0, x: 50, transition: { duration: 0.5 } },
 };
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -128,3 +128,5 @@ export default function ForgotPasswordPage() {
     </motion.div>
   );
 }
+
+export default ForgotPasswordPage;

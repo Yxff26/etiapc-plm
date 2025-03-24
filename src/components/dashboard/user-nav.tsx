@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { signOut } from "next-auth/react";
+
 export function UserNav() {
   return (
     <DropdownMenu>
@@ -38,8 +40,8 @@ export function UserNav() {
           <DropdownMenuItem>Settings</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Link href="../login">Cerrar sesión</Link>
+        <DropdownMenuItem onClick={() => signOut()}>
+          Cerrar sesión
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

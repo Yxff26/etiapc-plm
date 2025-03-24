@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,48 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
+// Axios
+import axios, { AxiosError } from "axios";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 const containerVariants = {
   hidden: { opacity: 0, x: -50 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
   exit: { opacity: 0, x: 50, transition: { duration: 0.5 } },
 };
 
-export default function RegisterPage() {
+function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      const formData = new FormData(event.currentTarget);
+      const signupResponse = await axios.post("../api/auth/signup", {
+        email: formData.get("email"),
+        password: formData.get("password"),
+      });
+      console.log(signupResponse);
+      const res = await signIn("credentials", {
+        email: signupResponse.data.email,
+        password: formData.get("password"),
+        redirect: false,
+      });
+
+      if (res?.ok) return router.push("../dashboard");
+    } catch (error) {
+      console.log(error);
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data.message;
+        setError(errorMessage);
+      }
+    }
+  };
 
   return (
     <motion.div
@@ -81,11 +115,17 @@ export default function RegisterPage() {
             </div>
 
             {/* Formulario de Registro */}
-            <form className="space-y-4">
+            {error && (
+              <div className="bg-red-500 text-white p-2 rounded-md">
+                {error}
+              </div>
+            )}
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
                 <Input
                   id="email"
+                  name="email"
                   placeholder="Introduce tu correo electrónico"
                   type="email"
                   required
@@ -96,32 +136,9 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Crea una contraseña"
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOffIcon className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirmar Contraseña</Label>
-                <div className="relative">
-                  <Input
-                    id="confirm-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Confirma tu contraseña"
                     required
                   />
                   <Button
@@ -163,7 +180,7 @@ export default function RegisterPage() {
 
               {/* Botón de Registro */}
               <Button type="submit" className="w-full">
-                <Link href="../profile/create">Crear Cuenta</Link>
+                {loading ? "Creando cuenta..." : "Crear Cuenta"}
               </Button>
             </form>
 
@@ -206,3 +223,5 @@ export default function RegisterPage() {
     </motion.div>
   );
 }
+
+export default RegisterPage;

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function ResetPasswordPage() {
+function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-muted/30">
       <div className="w-full max-w-md mx-auto space-y-8">
@@ -41,3 +41,5 @@ export default function ResetPasswordPage() {
     </div>
   );
 }
+
+export default ResetPasswordPage;

@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
+import { AxiosError } from "axios";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -16,8 +19,26 @@ const containerVariants = {
   exit: { opacity: 0, x: 50, transition: { duration: 0.5 } },
 };
 
-export default function LoginPage() {
+function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);  
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    const formData = new FormData(event.currentTarget);
+    const res = await signIn("credentials", {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      redirect: false,
+    });
+
+    if (res?.error) setError(res.error as string);
+
+    if (res?.ok) return router.push("../dashboard");
+  };
 
   return (
     <motion.div
@@ -81,11 +102,12 @@ export default function LoginPage() {
             </div>
 
             {/* Formulario de Correo Electrónico y Contraseña */}
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
                 <Input
                   id="email"
+                  name="email"
                   placeholder="Introduce tu correo electrónico"
                   type="email"
                   required
@@ -96,6 +118,7 @@ export default function LoginPage() {
                 <div className="relative">
                   <Input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Introduce tu contraseña"
                     required
@@ -137,7 +160,7 @@ export default function LoginPage() {
 
               {/* Botón de Inicio de Sesión */}
               <Button type="submit" className="w-full">
-                <Link href="dashboard">Iniciar sesión</Link>
+                {loading ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>
             </form>
 
@@ -180,3 +203,5 @@ export default function LoginPage() {
     </motion.div>
   );
 }
+
+export default LoginPage;
