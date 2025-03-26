@@ -51,17 +51,36 @@ function ResetPasswordPage() {
 
     try {
       const formData = new FormData(event.currentTarget);
+      const password = formData.get("password") as string;
+      const confirmPassword = formData.get("confirmPassword") as string;
+
+      if (password !== confirmPassword) {
+        setError("Las contraseñas no coinciden");
+        setLoading(false);
+        return;
+      }
+
+      if (password.length < 6) {
+        setError("La contraseña debe tener al menos 6 caracteres");
+        setLoading(false);
+        return;
+      }
+
       await axios.post("/api/auth/reset-password", {
         token,
-        password: formData.get("password"),
+        password,
       });
+      
       setSuccess(true);
       setTimeout(() => {
         router.push("/auth/login");
       }, 3000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setError(error.response?.data.message || "Ocurrió un error");
+        setError(
+          error.response?.data?.message || 
+          "Ocurrió un error al restablecer la contraseña"
+        );
       } else {
         setError("Ocurrió un error inesperado");
       }

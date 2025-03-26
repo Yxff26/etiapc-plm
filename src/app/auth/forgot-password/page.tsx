@@ -18,23 +18,28 @@ const containerVariants = {
 function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [email, setEmail] = useState("");
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess(false);
+    setSuccess("");
 
     try {
-      const formData = new FormData(event.currentTarget);
-      await axios.post("/api/auth/forgot-password", {
-        email: formData.get("email"),
+      const response = await axios.post("/api/auth/forgot-password", {
+        email,
       });
-      setSuccess(true);
+
+      setSuccess(response.data.message);
+      setEmail("");
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setError(error.response?.data.message || "Ocurrió un error");
+        setError(
+          error.response?.data?.message ||
+            "Ocurrió un error al enviar el correo de recuperación"
+        );
       } else {
         setError("Ocurrió un error inesperado");
       }
@@ -70,7 +75,7 @@ function ForgotPasswordPage() {
 
           {success && (
             <div className="bg-green-500 text-white p-3 rounded-md text-sm">
-              Se ha enviado un enlace de recuperación a tu correo electrónico
+              {success}
               </div>
           )}
 
@@ -82,6 +87,8 @@ function ForgotPasswordPage() {
                 name="email"
                     type="email"
                 placeholder="nombre@ejemplo.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>

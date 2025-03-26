@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   try {
     await connectDB();
+    
+    // Obtener el token de la URL
     const { searchParams } = new URL(request.url);
     const token = searchParams.get("token");
 
@@ -15,9 +17,10 @@ export async function GET(request: Request) {
       );
     }
 
+    // Buscar usuario con el token y verificar que no haya expirado
     const user = await User.findOne({
       resetPasswordToken: token,
-      resetPasswordExpiry: { $gt: Date.now() },
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -27,11 +30,14 @@ export async function GET(request: Request) {
       );
     }
 
-    return NextResponse.json({ valid: true });
-  } catch (error) {
-    console.error("Error en validate-reset-token:", error);
     return NextResponse.json(
-      { message: "Ocurrió un error al validar el token" },
+      { message: "Token válido" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error al validar token:", error);
+    return NextResponse.json(
+      { message: "Error al validar el token" },
       { status: 500 }
     );
   }

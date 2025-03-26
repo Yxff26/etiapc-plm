@@ -9,6 +9,13 @@ export async function POST(request: Request) {
     await connectDB();
     const { email } = await request.json();
 
+    if (!email) {
+      return NextResponse.json(
+        { message: "El correo electrónico es requerido" },
+        { status: 400 }
+      );
+    }
+
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -20,7 +27,7 @@ export async function POST(request: Request) {
 
     // Generar token de recuperación
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hora
+    const resetExpires = new Date(Date.now() + 3600000); // 1 hora
 
     // Actualizar solo los campos de recuperación de contraseña
     await User.updateOne(
@@ -28,7 +35,7 @@ export async function POST(request: Request) {
       {
         $set: {
           resetPasswordToken: resetToken,
-          resetPasswordExpiry: resetTokenExpiry,
+          resetPasswordExpires: resetExpires,
         },
       }
     );

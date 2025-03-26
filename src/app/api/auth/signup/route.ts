@@ -3,6 +3,8 @@ import User from "@/models/user";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import { sendVerificationEmail } from "@/lib/email";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
@@ -28,18 +30,27 @@ export async function POST(request: Request) {
         }
       );
 
+    // Generar token de verificación
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = new User({
       email,
       password: hashedPassword,
+      emailVerificationToken: verificationToken,
+      emailVerificationExpires: verificationExpires,
     });
 
     const savedUser = await user.save();
-    console.log(savedUser);
+
+    // Enviar correo de verificación
+    await sendVerificationEmail(email, verificationToken);
 
     return NextResponse.json(
       {
+        message: "Usuario registrado exitosamente. Por favor, verifica tu correo electrónico.",
         email,
         createdAt: savedUser.createdAt,
         updatedAt: savedUser.updatedAt,
@@ -57,6 +68,10 @@ export async function POST(request: Request) {
         }
       );
     }
-    return NextResponse.error();
+    console.error("Error en signup:", error);
+    return NextResponse.json(
+      { message: "Ocurrió un error al registrar el usuario" },
+      { status: 500 }
+    );
   }
 }

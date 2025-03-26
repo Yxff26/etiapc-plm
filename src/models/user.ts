@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,23 +11,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "El correo electrónico es requerido"],
       unique: true,
-      match: [
-        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        "Por favor ingresa un correo electrónico válido",
-      ],
+      lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
       required: [true, "La contraseña es requerida"],
-      select: false,
+      minlength: [6, "La contraseña debe tener al menos 6 caracteres"],
     },
     role: {
       type: String,
-      enum: ["teacher", "coordinator", "admin"],
+      enum: ["teacher", "coordinator"],
       default: "teacher",
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: String,
+    emailVerificationExpires: Date,
     resetPasswordToken: String,
-    resetPasswordExpiry: Date,
+    resetPasswordExpires: Date,
   },
   {
     timestamps: true,

@@ -36,20 +36,17 @@ function RegisterPage() {
         email: formData.get("email"),
         password: formData.get("password"),
       });
-      console.log(signupResponse);
-      const res = await signIn("credentials", {
-        email: signupResponse.data.email,
-        password: formData.get("password"),
-        redirect: false,
-      });
-
-      if (res?.ok) return router.push("../dashboard");
+      
+      // Redirigir al login después del registro exitoso
+      router.push("/auth/login?message=Por favor, verifica tu correo electrónico para continuar");
     } catch (error) {
       console.log(error);
       if (error instanceof AxiosError) {
         const errorMessage = error.response?.data.message;
         setError(errorMessage);
       }
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -15,9 +15,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (password.length < 6) {
+      return NextResponse.json(
+        { message: "La contraseña debe tener al menos 6 caracteres" },
+        { status: 400 }
+      );
+    }
+
     const user = await User.findOne({
       resetPasswordToken: token,
-      resetPasswordExpiry: { $gt: Date.now() },
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -34,8 +41,8 @@ export async function POST(request: Request) {
       {
         $set: {
           password: hashedPassword,
-          resetPasswordToken: null,
-          resetPasswordExpiry: null,
+          resetPasswordToken: undefined,
+          resetPasswordExpires: undefined,
         },
       }
     );
