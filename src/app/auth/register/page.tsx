@@ -50,6 +50,14 @@ function RegisterPage() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      await signIn("google", { callbackUrl: "/dashboard" });
+    } catch (error) {
+      setError("Error al iniciar sesión con Google");
+    }
+  };
+
   return (
     <motion.div
       className="flex min-h-screen"
@@ -87,7 +95,11 @@ function RegisterPage() {
 
             {/* Botones de Registro Social */}
             <div className="grid grid-cols-1 gap-4">
-              <Button variant="outline" className="w-full hover:bg-primary">
+              <Button 
+                variant="outline" 
+                className="w-full hover:bg-primary"
+                onClick={handleGoogleSignIn}
+              >
                 <Image
                   src="/google-icon.svg"
                   alt="Google"

@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db/mongodb";
 import User from "@/models/user";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 
 const MAX_LOGIN_ATTEMPTS = 10;
@@ -9,6 +10,10 @@ const LOCK_TIME = 30 * 60 * 1000; // 30 minutos en milisegundos
 
 const handler = NextAuth({
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
       name: "Credentials",
       id: "credentials",
@@ -80,8 +85,42 @@ const handler = NextAuth({
     maxAge: 24 * 60 * 60, // 24 horas por defecto
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        try {
+          await connectDB();
+          const existingUser = await User.findOne({ email: user.email });
+          
+          if (!existingUser) {
+            // Crear nuevo usuario si no existe
+            const newUser = new User({
+              email: user.email,
+              name: user.name,
+              password: await bcrypt.hash(Math.random().toString(36), 10), // Generar contraseña aleatoria
+              isEmailVerified: true, // Los usuarios de Google ya están verificados
+            });
+            await newUser.save();
+          }
+        } catch (error) {
+          console.error("Error en signIn callback:", error);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
-      if (user) token.user = user;
+      if (user) {
+        await connectDB();
+        const dbUser = await User.findOne({ email: user.email });
+        if (dbUser) {
+          token.user = {
+            id: dbUser._id,
+            email: dbUser.email,
+            name: dbUser.name,
+            role: dbUser.role,
+          };
+        }
+      }
       if (trigger === "signIn" && session?.remember) {
         token.maxAge = 30 * 24 * 60 * 60; // 30 días si se marca "recordar"
       }
