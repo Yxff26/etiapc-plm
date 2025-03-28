@@ -1,21 +1,45 @@
 import mongoose from "mongoose";
 
-const { MONGODB_URI } = process.env;
-
-if (!MONGODB_URI) {
-  throw new Error("MONGODB_URI no esta definido en las variables de entorno");
+declare global {
+  var mongoose: any;
 }
 
-export const connectDB = async () => {
-  try {
-    const { connection } = await mongoose.connect(MONGODB_URI);
-    if (connection.readyState === 1) {
-      console.log("MongoDB conectado");
-      return Promise.resolve(true);
-    }
-  } catch (error) {
-    console.log("MongoDB fallo la conexion");
-    console.log("Debido al siguiente error: ", error);
-    return Promise.reject(error);
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error("Please define the MONGODB_URI environment variable inside .env");
+}
+
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+export async function connectDB() {
+  if (cached.conn) {
+    console.log("Usando conexión existente a MongoDB");
+    return cached.conn;
   }
-};
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+
+    console.log("Conectando a MongoDB...");
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      console.log("Conexión exitosa a MongoDB");
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
+  } catch (e) {
+    cached.promise = null;
+    console.error("Error conectando a MongoDB:", e);
+    throw e;
+  }
+}

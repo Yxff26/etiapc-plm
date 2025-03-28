@@ -23,113 +23,108 @@ const handler = NextAuth({
         remember: { label: "Remember", type: "checkbox" },
       },
       async authorize(credentials) {
-        await connectDB();
-        const userFound = await User.findOne({
-          email: credentials?.email,
-        }).select("+password");
+        try {
+          await connectDB();
+          const userFound = await User.findOne({
+            email: credentials?.email,
+          }).select("+password");
 
-        if (!userFound) throw new Error("Credenciales incorrectas");
+          if (!userFound) throw new Error("Credenciales incorrectas");
 
-        // Verificar si la cuenta está bloqueada
-        if (userFound.lockUntil && userFound.lockUntil > Date.now()) {
-          const remainingTime = Math.ceil((userFound.lockUntil.getTime() - Date.now()) / 1000 / 60);
-          throw new Error(`Tu cuenta está bloqueada. Intenta nuevamente en ${remainingTime} minutos.`);
-        }
-
-        // Si la cuenta estaba bloqueada pero ya pasó el tiempo, resetear los intentos
-        if (userFound.lockUntil && userFound.lockUntil <= Date.now()) {
-          userFound.loginAttempts = 0;
-          userFound.lockUntil = null;
-          await userFound.save();
-        }
-
-        const passwordMatch = await bcrypt.compare(
-          credentials!.password,
-          userFound.password
-        );
-
-        if (!passwordMatch) {
-          // Incrementar intentos de inicio de sesión
-          userFound.loginAttempts += 1;
-          
-          // Si excede el máximo de intentos, bloquear la cuenta
-          if (userFound.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-            userFound.lockUntil = new Date(Date.now() + LOCK_TIME);
-            await userFound.save();
-            throw new Error(`Has excedido el límite de intentos. Tu cuenta está bloqueada por ${LOCK_TIME/1000/60} minutos.`);
+          // Verificar si la cuenta está bloqueada
+          if (userFound.lockUntil && userFound.lockUntil > Date.now()) {
+            const remainingTime = Math.ceil((userFound.lockUntil.getTime() - Date.now()) / 1000 / 60);
+            throw new Error(`Tu cuenta está bloqueada. Intenta nuevamente en ${remainingTime} minutos.`);
           }
-          
-          await userFound.save();
-          throw new Error("Credenciales incorrectas");
+
+          const passwordMatch = await bcrypt.compare(
+            credentials!.password,
+            userFound.password
+          );
+
+          if (!passwordMatch) {
+            // Incrementar intentos fallidos
+            userFound.loginAttempts = (userFound.loginAttempts || 0) + 1;
+
+            // Si excede el máximo de intentos, bloquear la cuenta
+            if (userFound.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+              userFound.lockUntil = new Date(Date.now() + LOCK_TIME);
+            }
+
+            await userFound.save();
+            throw new Error("Credenciales incorrectas");
+          }
+
+          // Resetear intentos fallidos si el login es exitoso
+          if (userFound.loginAttempts > 0 || userFound.lockUntil) {
+            userFound.loginAttempts = 0;
+            userFound.lockUntil = null;
+            await userFound.save();
+          }
+
+          return {
+            id: userFound._id.toString(),
+            email: userFound.email,
+            name: userFound.name,
+            role: userFound.role, // Asegurarnos de incluir el rol
+          };
+        } catch (error: any) {
+          throw new Error(error.message || "Error en la autenticación");
         }
-
-        // Si la contraseña es correcta, resetear los intentos
-        userFound.loginAttempts = 0;
-        userFound.lockUntil = null;
-        await userFound.save();
-
-        return {
-          id: userFound._id,
-          email: userFound.email,
-          name: userFound.name,
-          role: userFound.role,
-        };
       },
     }),
   ],
-  pages: {
-    signIn: "/auth/login",
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 horas por defecto
-  },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
           await connectDB();
           const existingUser = await User.findOne({ email: user.email });
           
           if (!existingUser) {
-            // Crear nuevo usuario si no existe
-            const newUser = new User({
+            const newUser = await User.create({
               email: user.email,
               name: user.name,
-              password: await bcrypt.hash(Math.random().toString(36), 10), // Generar contraseña aleatoria
-              isEmailVerified: true, // Los usuarios de Google ya están verificados
+              role: "teacher", // Rol por defecto para usuarios de Google
+              password: await bcrypt.hash(Math.random().toString(36), 10),
             });
-            await newUser.save();
+            user.role = newUser.role;
+          } else {
+            user.role = existingUser.role;
           }
         } catch (error) {
-          console.error("Error en signIn callback:", error);
+          console.error("Error en signIn:", error);
           return false;
         }
       }
       return true;
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user }) {
       if (user) {
-        await connectDB();
-        const dbUser = await User.findOne({ email: user.email });
-        if (dbUser) {
-          token.user = {
-            id: dbUser._id,
-            email: dbUser.email,
-            name: dbUser.name,
-            role: dbUser.role,
-          };
-        }
-      }
-      if (trigger === "signIn" && session?.remember) {
-        token.maxAge = 30 * 24 * 60 * 60; // 30 días si se marca "recordar"
+        // Cuando el usuario inicia sesión, guardar sus datos en el token
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
-      session.user = token.user as any;
+      if (session.user) {
+        // Transferir los datos del token a la sesión
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.email = token.email;
+        session.user.name = token.name;
+      }
       return session;
-    },
+    }
+  },
+  pages: {
+    signIn: "/auth/login",
+  },
+  session: {
+    strategy: "jwt",
   },
 });
 
