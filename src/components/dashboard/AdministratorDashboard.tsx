@@ -1,121 +1,141 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { 
-  Users, 
-  Settings, 
-  Shield, 
-  BarChart,
-  UserPlus,
-  Activity
-} from "lucide-react";
+"use client"
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { StatCard } from "@/components/ui/stat-card"
+import { Users, ShieldCheck, FileText, Settings } from "lucide-react"
+import Link from "next/link"
+import { motion } from "framer-motion"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5
+    }
+  }
+}
 
 export default function AdministratorDashboard() {
+  // Datos simulados para el dashboard del administrador
+  const stats = {
+    totalUsers: 35,
+    teachers: 25,
+    coordinators: 8,
+    admins: 2,
+  }
+
+  const quickLinks = [
+    {
+      title: "Gestión de Usuarios",
+      description: "Administra los usuarios del sistema",
+      icon: Users,
+      href: "/dashboard/administrator/users",
+    },
+    {
+      title: "Roles y Permisos",
+      description: "Gestiona los roles y permisos",
+      icon: ShieldCheck,
+      href: "/dashboard/administrator/roles",
+    },
+    {
+      title: "Reportes",
+      description: "Visualiza reportes del sistema",
+      icon: FileText,
+      href: "/dashboard/administrator/reports",
+    },
+    {
+      title: "Configuración",
+      description: "Ajusta la configuración del sistema",
+      icon: Settings,
+      href: "/dashboard/administrator/settings",
+    },
+  ]
+
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Usuarios Totales</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">35</div>
-            <p className="text-xs text-muted-foreground">
-              Profesores: 25 | Coordinadores: 8 | Administradores: 2
-            </p>
-          </CardContent>
-        </Card>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div className="mb-8" variants={itemVariants}>
+        <h1 className="text-2xl font-bold">Panel de Administración</h1>
+        <p className="text-muted-foreground">
+          Bienvenido al panel de administración. Aquí tienes un resumen del sistema.
+        </p>
+      </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Actividad del Sistema</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">98%</div>
-            <p className="text-xs text-muted-foreground">
-              Tiempo de actividad del sistema
-            </p>
-          </CardContent>
-        </Card>
+      <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6" variants={containerVariants}>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Total Usuarios"
+            value={stats.totalUsers}
+            description="Usuarios registrados"
+            icon={Users}
+            color="primary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Profesores"
+            value={stats.teachers}
+            description="Profesores activos"
+            icon={Users}
+            color="secondary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Coordinadores"
+            value={stats.coordinators}
+            description="Coordinadores activos"
+            icon={Users}
+            color="accent"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Administradores"
+            value={stats.admins}
+            description="Administradores del sistema"
+            icon={Users}
+            color="destructive"
+          />
+        </motion.div>
+      </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Seguridad</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">100%</div>
-            <p className="text-xs text-muted-foreground">
-              Sistema actualizado y seguro
-            </p>
-          </CardContent>
-        </Card>
+      <motion.div className="grid gap-6 md:grid-cols-2" variants={containerVariants}>
+        {quickLinks.map((link, index) => (
+          <motion.div key={link.title} variants={itemVariants}>
+            <Link href={link.href}>
+              <Card className="hover:bg-accent/50 transition-colors">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <link.icon className="h-5 w-5" />
+                    <CardTitle>{link.title}</CardTitle>
+                  </div>
+                  <CardDescription>{link.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </motion.div>
+        ))}
+      </motion.div>
+    </motion.div>
+  )
+}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Evaluaciones Totales</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">150</div>
-            <p className="text-xs text-muted-foreground">
-              Total de evaluaciones realizadas
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Gestión de Usuarios</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Nuevos Usuarios</p>
-                  <p className="text-sm text-muted-foreground">3 usuarios pendientes de aprobación</p>
-                </div>
-                <Button variant="outline" size="sm">Gestionar</Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Roles y Permisos</p>
-                  <p className="text-sm text-muted-foreground">Configurar permisos del sistema</p>
-                </div>
-                <Button variant="outline" size="sm">Configurar</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Configuración del Sistema</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Parámetros de Evaluación</p>
-                  <p className="text-sm text-muted-foreground">Configurar criterios y rubros</p>
-                </div>
-                <Button variant="outline" size="sm">Editar</Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Reportes y Estadísticas</p>
-                  <p className="text-sm text-muted-foreground">Generar reportes del sistema</p>
-                </div>
-                <Button variant="outline" size="sm">Generar</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-} 

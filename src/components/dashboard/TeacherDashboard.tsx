@@ -1,107 +1,138 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { 
-  BookOpen, 
-  ClipboardCheck, 
-  Calendar, 
-  BarChart 
-} from "lucide-react";
+"use client"
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { StatCard } from "@/components/ui/stat-card"
+import { ClipboardCheck, BookOpen, BarChart, User } from "lucide-react"
+import Link from "next/link"
+import { motion } from "framer-motion"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5
+    }
+  }
+}
 
 export default function TeacherDashboard() {
+  // Datos simulados para el dashboard del profesor
+  const evaluationStats = {
+    totalEvaluations: 8,
+    averageScore: 4.2,
+    lastEvaluation: "15/03/2024",
+    pendingEvaluations: 0,
+  }
+
+  const quickLinks = [
+    {
+      title: "Mis Evaluaciones",
+      description: "Ver historial de evaluaciones",
+      icon: ClipboardCheck,
+      href: "/dashboard/teacher/evaluations",
+    },
+    {
+      title: "Mis Asignaturas",
+      description: "Gestionar asignaturas impartidas",
+      icon: BookOpen,
+      href: "/dashboard/teacher/subjects",
+    },
+    {
+      title: "Mis Estadísticas",
+      description: "Ver métricas y análisis",
+      icon: BarChart,
+      href: "/dashboard/teacher/stats",
+    },
+    {
+      title: "Mi Perfil",
+      description: "Actualizar información personal",
+      icon: User,
+      href: "/dashboard/teacher/profile",
+    },
+  ]
+
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Evaluaciones Pendientes</CardTitle>
-            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">
-              Evaluaciones que necesitan tu atención
-            </p>
-          </CardContent>
-        </Card>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div className="mb-8" variants={itemVariants}>
+        <h1 className="text-2xl font-bold">Mi Dashboard</h1>
+        <p className="text-muted-foreground">
+          Bienvenido de nuevo. Aquí tienes un resumen de tu actividad.
+        </p>
+      </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Evaluaciones Completadas</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">
-              Total de evaluaciones realizadas
-            </p>
-          </CardContent>
-        </Card>
+      <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6" variants={containerVariants}>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Total Evaluaciones"
+            value={evaluationStats.totalEvaluations}
+            description="Evaluaciones recibidas"
+            icon={ClipboardCheck}
+            color="primary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Calificación Promedio"
+            value={evaluationStats.averageScore}
+            description="Promedio de calificaciones"
+            icon={ClipboardCheck}
+            color="secondary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Última Evaluación"
+            value={evaluationStats.lastEvaluation}
+            description="Fecha de última evaluación"
+            icon={ClipboardCheck}
+            color="accent"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Evaluaciones Pendientes"
+            value={evaluationStats.pendingEvaluations}
+            description="Evaluaciones por realizar"
+            icon={ClipboardCheck}
+            color="destructive"
+          />
+        </motion.div>
+      </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Próxima Evaluación</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">15/04</div>
-            <p className="text-xs text-muted-foreground">
-              Fecha de tu próxima evaluación
-            </p>
-          </CardContent>
-        </Card>
+      <motion.div className="grid gap-6 md:grid-cols-2" variants={containerVariants}>
+        {quickLinks.map((link) => (
+          <motion.div key={link.title} variants={itemVariants}>
+            <Link href={link.href}>
+              <Card className="hover:bg-accent/50 transition-colors">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <link.icon className="h-5 w-5" />
+                    <CardTitle>{link.title}</CardTitle>
+                  </div>
+                  <CardDescription>{link.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </motion.div>
+        ))}
+      </motion.div>
+    </motion.div>
+  )
+}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Promedio General</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4.5</div>
-            <p className="text-xs text-muted-foreground">
-              Promedio de tus evaluaciones
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Últimas Evaluaciones</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Aquí irá la lista de últimas evaluaciones */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Evaluación de Desempeño</p>
-                  <p className="text-sm text-muted-foreground">Realizada el 10/03/2024</p>
-                </div>
-                <Button variant="outline" size="sm">Ver Detalles</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Próximas Actividades</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Aquí irá la lista de próximas actividades */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Auto-evaluación Trimestral</p>
-                  <p className="text-sm text-muted-foreground">Vence el 20/04/2024</p>
-                </div>
-                <Button variant="outline" size="sm">Comenzar</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-} 

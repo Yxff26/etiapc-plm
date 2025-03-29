@@ -1,107 +1,138 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { 
-  Users, 
-  ClipboardCheck, 
-  AlertCircle, 
-  BarChart 
-} from "lucide-react";
+"use client"
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { StatCard } from "@/components/ui/stat-card"
+import { GraduationCap, ClipboardCheck, BookOpen, FileText } from "lucide-react"
+import Link from "next/link"
+import { motion } from "framer-motion"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5
+    }
+  }
+}
 
 export default function CoordinatorDashboard() {
+  // Datos simulados para el dashboard del coordinador
+  const stats = {
+    totalTeachers: 25,
+    pendingEvaluations: 5,
+    completedEvaluations: 42,
+    totalSubjects: 8,
+  }
+
+  const quickLinks = [
+    {
+      title: "Gestión de Profesores",
+      description: "Administrar profesores",
+      icon: GraduationCap,
+      href: "/dashboard/coordinator/teachers",
+    },
+    {
+      title: "Evaluaciones",
+      description: "Gestionar evaluaciones",
+      icon: ClipboardCheck,
+      href: "/dashboard/coordinator/evaluations",
+    },
+    {
+      title: "Asignaturas",
+      description: "Administrar asignaturas",
+      icon: BookOpen,
+      href: "/dashboard/coordinator/subjects",
+    },
+    {
+      title: "Reportes",
+      description: "Ver reportes y análisis",
+      icon: FileText,
+      href: "/dashboard/coordinator/reports",
+    },
+  ]
+
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profesores Activos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">25</div>
-            <p className="text-xs text-muted-foreground">
-              Total de profesores en el sistema
-            </p>
-          </CardContent>
-        </Card>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.div className="mb-8" variants={itemVariants}>
+        <h1 className="text-2xl font-bold">Panel de Coordinación</h1>
+        <p className="text-muted-foreground">
+          Bienvenido al panel de coordinación. Aquí tienes un resumen de tu área.
+        </p>
+      </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Evaluaciones Pendientes</CardTitle>
-            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">
-              Evaluaciones por revisar
-            </p>
-          </CardContent>
-        </Card>
+      <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6" variants={containerVariants}>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Total Profesores"
+            value={stats.totalTeachers}
+            description="Profesores activos"
+            icon={GraduationCap}
+            color="primary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Evaluaciones Pendientes"
+            value={stats.pendingEvaluations}
+            description="Por realizar"
+            icon={ClipboardCheck}
+            color="destructive"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Evaluaciones Completadas"
+            value={stats.completedEvaluations}
+            description="Realizadas"
+            icon={ClipboardCheck}
+            color="secondary"
+          />
+        </motion.div>
+        <motion.div variants={itemVariants}>
+          <StatCard
+            title="Total Asignaturas"
+            value={stats.totalSubjects}
+            description="Asignaturas activas"
+            icon={BookOpen}
+            color="accent"
+          />
+        </motion.div>
+      </motion.div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alertas</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">
-              Profesores con evaluaciones atrasadas
-            </p>
-          </CardContent>
-        </Card>
+      <motion.div className="grid gap-6 md:grid-cols-2" variants={containerVariants}>
+        {quickLinks.map((link) => (
+          <motion.div key={link.title} variants={itemVariants}>
+            <Link href={link.href}>
+              <Card className="hover:bg-accent/50 transition-colors">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <link.icon className="h-5 w-5" />
+                    <CardTitle>{link.title}</CardTitle>
+                  </div>
+                  <CardDescription>{link.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </motion.div>
+        ))}
+      </motion.div>
+    </motion.div>
+  )
+}
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Promedio General</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4.2</div>
-            <p className="text-xs text-muted-foreground">
-              Promedio de todas las evaluaciones
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Evaluaciones Recientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Aquí irá la lista de evaluaciones recientes */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Juan Pérez</p>
-                  <p className="text-sm text-muted-foreground">Evaluación de Desempeño - 10/03/2024</p>
-                </div>
-                <Button variant="outline" size="sm">Revisar</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Profesores con Evaluaciones Pendientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Aquí irá la lista de profesores con evaluaciones pendientes */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">María García</p>
-                  <p className="text-sm text-muted-foreground">Auto-evaluación vence en 5 días</p>
-                </div>
-                <Button variant="outline" size="sm">Notificar</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-} 
