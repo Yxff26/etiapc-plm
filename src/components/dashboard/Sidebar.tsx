@@ -74,7 +74,7 @@ export function Sidebar({ userRole = "teacher" }: SidebarProps) {
           <div className="h-8 w-8 rounded-md bg-white flex items-center justify-center mr-2">
             <div className="h-4 w-4 rounded-sm bg-primary" />
           </div>
-          <span className="text-xl font-bold">EvalSys</span>
+          <span className="text-xl font-bold">ETIAPC</span>
         </Link>
       </div>
 

@@ -6,6 +6,7 @@ import { StatCard } from "@/components/ui/stat-card"
 import { Users, ShieldCheck, FileText, Settings } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useState, useEffect } from "react"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -29,13 +30,26 @@ const itemVariants = {
 }
 
 export default function AdministratorDashboard() {
-  // Datos simulados para el dashboard del administrador
-  const stats = {
-    totalUsers: 35,
-    teachers: 25,
-    coordinators: 8,
-    admins: 2,
-  }
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    teachers: 0,
+    coordinators: 0,
+    admins: 0,
+  })
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats')
+        const data = await response.json()
+        setStats(data)
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      }
+    }
+
+    fetchStats()
+  }, [])
 
   const quickLinks = [
     {

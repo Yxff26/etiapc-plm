@@ -33,6 +33,8 @@ function RegisterPage() {
     try {
       const formData = new FormData(event.currentTarget);
       const signupResponse = await axios.post("../api/auth/signup", {
+        firstName: formData.get("firstName"),
+        lastName: formData.get("lastName"),
         email: formData.get("email"),
         password: formData.get("password"),
       });
@@ -130,6 +132,28 @@ function RegisterPage() {
               </div>
             )}
             <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Nombre</Label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    placeholder="Tu nombre"
+                    type="text"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Apellido</Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Tu apellido"
+                    type="text"
+                    required
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
                 <Input

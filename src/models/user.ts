@@ -3,9 +3,15 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
-      required: false,
+      required: [true, "El nombre es requerido"],
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: [true, "El apellido es requerido"],
+      trim: true,
     },
     email: {
       type: String,
@@ -41,11 +47,25 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    googleProfileImage: {
+      type: String,
+      default: null,
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    }
   },
   {
     timestamps: true,
   }
 );
+
+// Virtual para obtener el nombre completo
+userSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 

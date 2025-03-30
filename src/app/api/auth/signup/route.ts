@@ -10,7 +10,7 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const { email, password } = await request.json();
+    const { email, password, firstName, lastName } = await request.json();
 
     if (password < 6)
       return NextResponse.json(
@@ -37,6 +37,8 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = new User({
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
       emailVerificationToken: verificationToken,
