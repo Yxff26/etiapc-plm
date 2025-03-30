@@ -82,9 +82,13 @@ const handler = NextAuth({
           const existingUser = await User.findOne({ email: user.email });
           
           if (!existingUser) {
+            const [firstName, ...lastNameParts] = user.name.split(" ");
+            const lastName = lastNameParts.join(" "); // Unir el resto como apellido
+
             const newUser = await User.create({
               email: user.email,
-              name: user.name,
+              firstName: firstName, // Asignar el primer nombre
+              lastName: lastName, // Asignar el apellido
               role: "teacher", // Rol por defecto para usuarios de Google
               password: await bcrypt.hash(Math.random().toString(36), 10),
             });
@@ -111,11 +115,10 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        // Transferir los datos del token a la sesión
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.email = token.email;
-        session.user.name = token.name;
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
       }
       return session;
     }

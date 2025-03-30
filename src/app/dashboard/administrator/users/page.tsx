@@ -1,12 +1,13 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, UserPlus, Mail, Shield, Calendar } from "lucide-react"
+import { toast } from "sonner"
+import axios from "axios"
 import { useState, useEffect } from "react"
+import { EditUserModal } from "@/components/dashboard/administrator/EditUserModal"
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 
 interface User {
   _id: string
@@ -15,7 +16,6 @@ interface User {
   email: string
   role: string
   isEmailVerified: boolean
-  loginAttempts: number
   createdAt: string
   googleProfileImage?: string
   authProvider: string
@@ -23,173 +23,189 @@ interface User {
 
 export default function AdministratorUsersPage() {
   const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
+
+  // Función para obtener las iniciales del usuario
+  const getInitials = (firstName: string, lastName: string) => {
+    const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
+    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+    return `${firstInitial}${lastInitial}`;
+  }
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setIsLoading(true)
-        const response = await fetch('/api/users')
-        const data = await response.json()
-        setUsers(data)
-      } catch (error) {
-        console.error('Error fetching users:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchUsers()
   }, [])
 
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case "teacher":
-        return "Profesor"
-      case "coordinator":
-        return "Coordinador"
-      case "administrator":
-        return "Administrador"
-      default:
-        return role
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get("/api/users")
+      setUsers(response.data)
+    } catch (error) {
+      console.error("Error fetching users:", error)
+      toast.error("Error al cargar los usuarios")
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getInitials = (firstName?: string, lastName?: string) => {
-    if (!firstName && !lastName) return '?'
-    const firstInitial = firstName ? firstName[0] : ''
-    const lastInitial = lastName ? lastName[0] : ''
-    return `${firstInitial}${lastInitial}`.toUpperCase()
+  const handleEditClick = (user: User) => {
+    setSelectedUser(user)
+    setIsEditModalOpen(true)
   }
 
-  const filteredUsers = users.filter(user => {
-    if (!user) return false
+  const handleDeleteUser = (user: User) => {
+    setUserToDelete(user)
+    setIsAlertDialogOpen(true)
+  }
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
+    try {
+      const response = await axios.delete(`/api/users/${userToDelete._id}`)
+      if (response.status === 200) {
+        toast.success("Usuario eliminado exitosamente")
+        fetchUsers() // Recargar la lista de usuarios
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      toast.error("Error al eliminar el usuario")
+    } finally {
+      setIsAlertDialogOpen(false)
+      setUserToDelete(null)
+    }
+  }
+
+  const filteredUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase()
-    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase()
     return (
-      fullName.includes(searchLower) ||
-      (user.email?.toLowerCase() || '').includes(searchLower)
+      user.firstName?.toLowerCase().includes(searchLower) ||
+      user.lastName?.toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower)
     )
   })
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Cargando usuarios...</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
     )
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
-          <div>
+    <div className="container mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
-            <p className="text-muted-foreground">
-              Administra los usuarios del sistema
-            </p>
-          </div>
-          <Button>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Nuevo Usuario
-          </Button>
-        </div>
+        <Input
+          placeholder="Buscar usuarios..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
+        />
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="pt-6">
+      <div className="grid gap-4">
+        {filteredUsers.map((user) => (
+          <Card key={user._id} className="w-full">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar usuarios..."
-              className="pl-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6">
-        {filteredUsers.length === 0 ? (
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">
-                {searchTerm ? 'No se encontraron usuarios que coincidan con la búsqueda' : 'No hay usuarios registrados'}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredUsers.map((user) => (
-            <Card key={user._id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage 
-                        src={user.authProvider === "google" ? user.googleProfileImage : undefined} 
-                        alt={`${user.firstName || ''} ${user.lastName || ''}`} 
+                    {user.googleProfileImage ? (
+                      <img
+                        src={user.googleProfileImage}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        className="w-12 h-12 rounded-full"
                       />
-                      <AvatarFallback>{getInitials(user.firstName, user.lastName)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-medium">
-                          {user.firstName && user.lastName 
-                            ? `${user.firstName} ${user.lastName}`
-                            : 'Usuario sin nombre'}
-                        </h3>
-                        <Badge variant="outline">{getRoleLabel(user.role)}</Badge>
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-lg font-semibold text-gray-600">
+                          {getInitials(user.firstName, user.lastName)}
+                        </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                    </div>
-                  </div>
-                  <Badge variant={user.isEmailVerified ? "default" : "secondary"}>
-                    {user.isEmailVerified ? "Verificado" : "No verificado"}
-                  </Badge>
-                </div>
-
-                <div className="mt-4 grid gap-4 md:grid-cols-3">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{user.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      Intentos de inicio: {user.loginAttempts}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      Registro: {new Date(user.createdAt).toLocaleDateString()}
-                    </span>
+                    )}
+          </div>
+                  <div>
+                    <h3 className="font-semibold">
+                      {user.firstName && user.lastName
+                        ? `${user.firstName} ${user.lastName}`
+                        : "Usuario sin nombre"}
+                    </h3>
+                    <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
                 </div>
-
-                <div className="mt-4 flex justify-end gap-2">
-                  <Button variant="outline" size="sm">
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditClick(user)}
+                  >
                     Editar
                   </Button>
-                  <Button variant="outline" size="sm">
-                    <Shield className="h-4 w-4 mr-2" />
-                    Permisos
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                  >
-                    Eliminar
-                  </Button>
+                  <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user)}>
+                        Eliminar
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Eliminar Usuario</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          ¿Estás seguro de que deseas eliminar a {user.firstName} {user.lastName}? Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div className="flex justify-end">
+                        <AlertDialogCancel onClick={() => setIsAlertDialogOpen(false)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDeleteUser}>Eliminar</AlertDialogAction>
+                      </div>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-500">
+                <div>
+                  <span className="font-medium">Rol:</span>{" "}
+                  <span className="capitalize">{user.role}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Estado:</span>{" "}
+                  {user.isEmailVerified ? (
+                    <span className="text-green-600">Verificado</span>
+                  ) : (
+                    <span className="text-yellow-600">Pendiente</span>
+                  )}
+                </div>
+                <div>
+                  <span className="font-medium">Método de autenticación:</span>{" "}
+                  <span className="capitalize">
+                    {user.authProvider === "google" ? "Google" : "Email"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium">Fecha de registro:</span>{" "}
+                  {new Date(user.createdAt).toLocaleDateString()}
+              </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
+
+      <EditUserModal
+        user={selectedUser}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setSelectedUser(null)
+        }}
+        onUserUpdated={fetchUsers}
+      />
     </div>
   )
-} 
+}
