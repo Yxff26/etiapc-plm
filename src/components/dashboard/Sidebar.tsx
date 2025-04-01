@@ -57,10 +57,8 @@ export function Sidebar({ userRole = "teacher" }: SidebarProps) {
   // Menú para administradores
   const adminMenu = [
     { icon: Home, label: "Inicio", path: "/dashboard" },
-    { icon: Users, label: "Gestión de Usuarios", path: "/dashboard/administrator/users" },
-    { icon: ShieldCheck, label: "Roles y Permisos", path: "/dashboard/administrator/roles" },
+    { icon: Users, label: "Usuarios", path: "/dashboard/administrator/users" },
     { icon: BarChart, label: "Reportes", path: "/dashboard/administrator/reports" },
-    { icon: Settings, label: "Configuración", path: "/dashboard/administrator/settings" },
     { icon: User, label: "Mi Perfil", path: "/dashboard/administrator/profile" },
   ]
 

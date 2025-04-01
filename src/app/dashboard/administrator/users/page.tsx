@@ -2,12 +2,11 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import axios from "axios"
 import { useState, useEffect } from "react"
-import { EditUserModal } from "@/components/dashboard/administrator/EditUserModal"
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+import { UsersTable } from "@/components/dashboard/administrator/UsersTable"
+import { FileDown } from "lucide-react"
 
 interface User {
   _id: string
@@ -16,26 +15,15 @@ interface User {
   email: string
   role: string
   isEmailVerified: boolean
+  loginAttempts: number
   createdAt: string
-  googleProfileImage?: string
+  image: string | null
   authProvider: string
 }
 
 export default function AdministratorUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<User | null>(null)
-  const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false)
-
-  // Función para obtener las iniciales del usuario
-  const getInitials = (firstName: string, lastName: string) => {
-    const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
-    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-    return `${firstInitial}${lastInitial}`;
-  }
 
   useEffect(() => {
     fetchUsers()
@@ -53,41 +41,44 @@ export default function AdministratorUsersPage() {
     }
   }
 
-  const handleEditClick = (user: User) => {
-    setSelectedUser(user)
-    setIsEditModalOpen(true)
-  }
-
-  const handleDeleteUser = (user: User) => {
-    setUserToDelete(user)
-    setIsAlertDialogOpen(true)
-  }
-
-  const confirmDeleteUser = async () => {
-    if (!userToDelete) return
+  const handleUserDeleted = async (userId: string) => {
     try {
-      const response = await axios.delete(`/api/users/${userToDelete._id}`)
+      const response = await axios.delete(`/api/users/${userId}`)
       if (response.status === 200) {
         toast.success("Usuario eliminado exitosamente")
-        fetchUsers() // Recargar la lista de usuarios
+        fetchUsers()
       }
     } catch (error) {
       console.error("Error deleting user:", error)
       toast.error("Error al eliminar el usuario")
-    } finally {
-      setIsAlertDialogOpen(false)
-      setUserToDelete(null)
     }
   }
 
-  const filteredUsers = users.filter((user) => {
-    const searchLower = searchTerm.toLowerCase()
-    return (
-      user.firstName?.toLowerCase().includes(searchLower) ||
-      user.lastName?.toLowerCase().includes(searchLower) ||
-      user.email.toLowerCase().includes(searchLower)
-    )
-  })
+  const handleExportUsers = () => {
+    // Convertir usuarios a CSV
+    const headers = ["Nombre", "Email", "Rol", "Estado", "Fecha de registro"]
+    const csvContent = [
+      headers.join(","),
+      ...users.map(user => [
+        `${user.firstName} ${user.lastName}`,
+        user.email,
+        user.role,
+        user.isEmailVerified ? "Verificado" : "Pendiente",
+        new Date(user.createdAt).toLocaleDateString()
+      ].join(","))
+    ].join("\n")
+
+    // Crear y descargar archivo
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `usuarios_${new Date().toISOString().split("T")[0]}.csv`)
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   if (loading) {
     return (
@@ -100,112 +91,27 @@ export default function AdministratorUsersPage() {
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
+          <div>
             <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
-        <Input
-          placeholder="Buscar usuarios..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
-
-      <div className="grid gap-4">
-        {filteredUsers.map((user) => (
-          <Card key={user._id} className="w-full">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-          <div className="relative">
-                    {user.googleProfileImage ? (
-                      <img
-                        src={user.googleProfileImage}
-                        alt={`${user.firstName} ${user.lastName}`}
-                        className="w-12 h-12 rounded-full"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-lg font-semibold text-gray-600">
-                          {getInitials(user.firstName, user.lastName)}
-                        </span>
-                      </div>
-                    )}
+            <p className="text-muted-foreground">
+              Administra los usuarios del sistema
+            </p>
           </div>
-                  <div>
-                    <h3 className="font-semibold">
-                      {user.firstName && user.lastName
-                        ? `${user.firstName} ${user.lastName}`
-                        : "Usuario sin nombre"}
-                    </h3>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditClick(user)}
-                  >
-                    Editar
-                  </Button>
-                  <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user)}>
-                        Eliminar
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Eliminar Usuario</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          ¿Estás seguro de que deseas eliminar a {user.firstName} {user.lastName}? Esta acción no se puede deshacer.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <div className="flex justify-end">
-                        <AlertDialogCancel onClick={() => setIsAlertDialogOpen(false)}>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmDeleteUser}>Eliminar</AlertDialogAction>
-                      </div>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-500">
-                <div>
-                  <span className="font-medium">Rol:</span>{" "}
-                  <span className="capitalize">{user.role}</span>
-                </div>
-                <div>
-                  <span className="font-medium">Estado:</span>{" "}
-                  {user.isEmailVerified ? (
-                    <span className="text-green-600">Verificado</span>
-                  ) : (
-                    <span className="text-yellow-600">Pendiente</span>
-                  )}
-                </div>
-                <div>
-                  <span className="font-medium">Método de autenticación:</span>{" "}
-                  <span className="capitalize">
-                    {user.authProvider === "google" ? "Google" : "Email"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium">Fecha de registro:</span>{" "}
-                  {new Date(user.createdAt).toLocaleDateString()}
-              </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <Button onClick={handleExportUsers}>
+          <FileDown className="h-4 w-4 mr-2" />
+          Exportar Usuarios
+          </Button>
       </div>
 
-      <EditUserModal
-        user={selectedUser}
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false)
-          setSelectedUser(null)
-        }}
-        onUserUpdated={fetchUsers}
-      />
+      <Card>
+        <CardContent className="p-6">
+          <UsersTable
+            users={users}
+            onUserUpdated={fetchUsers}
+            onUserDeleted={handleUserDeleted}
+          />
+        </CardContent>
+      </Card>
     </div>
   )
-}
+} 

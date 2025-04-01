@@ -53,16 +53,10 @@ export default function AdministratorDashboard() {
 
   const quickLinks = [
     {
-      title: "Gestión de Usuarios",
-      description: "Administra los usuarios del sistema",
+      title: "Usuarios",
+      description: "Gestiona los usuarios del sistema",
       icon: Users,
       href: "/dashboard/administrator/users",
-    },
-    {
-      title: "Roles y Permisos",
-      description: "Gestiona los roles y permisos",
-      icon: ShieldCheck,
-      href: "/dashboard/administrator/roles",
     },
     {
       title: "Reportes",

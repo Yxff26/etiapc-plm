@@ -57,16 +57,26 @@ export const authOptions: NextAuthOptions = {
         const existingUser = await User.findOne({ email: user.email });
         
         if (!existingUser) {
-          // Crear nuevo usuario con rol por defecto
+          // Crear nuevo usuario con rol por defecto y datos de Google
           const newUser = await User.create({
             email: user.email,
-            name: user.name,
+            firstName: user.name?.split(' ')[0] || '',
+            lastName: user.name?.split(' ').slice(1).join(' ') || '',
             role: "teacher",
-            password: await bcrypt.hash(Math.random().toString(36), 10), // Contraseña aleatoria
+            authProvider: "google",
+            image: user.image,
           });
           user.role = newUser.role;
+          user.image = newUser.image;
         } else {
           user.role = existingUser.role;
+          // Actualizar la imagen de perfil si el usuario ya existe
+          if (user.image && existingUser.authProvider === "google") {
+            await User.findByIdAndUpdate(existingUser._id, {
+              image: user.image
+            });
+          }
+          user.image = existingUser.image || user.image;
         }
       }
       return true;

@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     },
     lastName: {
       type: String,
-      required: [true, "El apellido es requerido"],
+      required: [false  , "El apellido es requerido"],
       trim: true,
     },
     email: {
@@ -22,7 +22,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "La contraseña es requerida"],
+      required: function() {
+        return this.authProvider === 'local';
+      },
       minlength: [6, "La contraseña debe tener al menos 6 caracteres"],
     },
     role: {
@@ -51,11 +53,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    image: {
+      type: String,
+      default: null,
+    },
     authProvider: {
       type: String,
       enum: ["local", "google"],
       default: "local",
-    }
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,

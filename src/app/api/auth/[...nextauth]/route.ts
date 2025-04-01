@@ -65,8 +65,11 @@ const handler = NextAuth({
           return {
             id: userFound._id.toString(),
             email: userFound.email,
-            name: userFound.name,
-            role: userFound.role, // Asegurarnos de incluir el rol
+            firstName: userFound.firstName,
+            lastName: userFound.lastName,
+            role: userFound.role,
+            image: userFound.image,
+            authProvider: userFound.authProvider,
           };
         } catch (error: any) {
           throw new Error(error.message || "Error en la autenticación");
@@ -82,19 +85,40 @@ const handler = NextAuth({
           const existingUser = await User.findOne({ email: user.email });
           
           if (!existingUser) {
-            const [firstName, ...lastNameParts] = user.name.split(" ");
-            const lastName = lastNameParts.join(" "); // Unir el resto como apellido
+            // Dividir el nombre completo en firstName y lastName
+            const [firstName = "", ...lastNameParts] = (user.name || "").split(" ");
+            const lastName = lastNameParts.join(" ");
 
             const newUser = await User.create({
               email: user.email,
-              firstName: firstName, // Asignar el primer nombre
-              lastName: lastName, // Asignar el apellido
-              role: "teacher", // Rol por defecto para usuarios de Google
+              firstName,
+              lastName,
+              role: "teacher",
               password: await bcrypt.hash(Math.random().toString(36), 10),
+              authProvider: "google",
+              image: user.image,
+              isEmailVerified: true, // Marcar como verificado automáticamente para usuarios de Google
             });
+
             user.role = newUser.role;
+            user.firstName = newUser.firstName;
+            user.lastName = newUser.lastName;
+            user.authProvider = newUser.authProvider;
+            user.isEmailVerified = true;
           } else {
             user.role = existingUser.role;
+            user.firstName = existingUser.firstName;
+            user.lastName = existingUser.lastName;
+            user.authProvider = existingUser.authProvider;
+            user.isEmailVerified = existingUser.isEmailVerified;
+            
+            // Actualizar la imagen de perfil si es un usuario de Google
+            if (user.image && existingUser.authProvider === "google") {
+              await User.findByIdAndUpdate(existingUser._id, {
+                image: user.image
+              });
+            }
+            user.image = existingUser.image || user.image;
           }
         } catch (error) {
           console.error("Error en signIn:", error);
@@ -105,20 +129,27 @@ const handler = NextAuth({
     },
     async jwt({ token, user }) {
       if (user) {
-        // Cuando el usuario inicia sesión, guardar sus datos en el token
         token.id = user.id;
         token.email = user.email;
-        token.name = user.name;
+        token.firstName = user.firstName;
+        token.lastName = user.lastName;
         token.role = user.role;
+        token.image = user.image;
+        token.authProvider = user.authProvider;
+        token.isEmailVerified = user.isEmailVerified;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as string;
+        session.user.role = token.role as "teacher" | "coordinator" | "administrator";
         session.user.email = token.email as string;
-        session.user.name = token.name as string;
+        session.user.firstName = token.firstName as string;
+        session.user.lastName = token.lastName as string;
+        session.user.image = token.image as string | null;
+        session.user.authProvider = token.authProvider as "credentials" | "google";
+        session.user.isEmailVerified = token.isEmailVerified as boolean;
       }
       return session;
     }

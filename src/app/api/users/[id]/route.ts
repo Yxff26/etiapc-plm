@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db/mongodb"
 import { NextResponse } from "next/server"
 import { ObjectId } from "mongodb"
+import User from "@/models/user"
 
 export async function PUT(
   request: Request,
@@ -75,36 +76,35 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { db } = await connectDB()
-    const users = db.collection("users")
+    await connectDB();
 
     // Verificar que el ID sea válido
     if (!ObjectId.isValid(params.id)) {
       return NextResponse.json(
         { error: "ID de usuario inválido" },
         { status: 400 }
-      )
+      );
     }
 
-    // Intentar eliminar el usuario
-    const result = await users.deleteOne({ _id: new ObjectId(params.id) })
+    // Intentar eliminar el usuario usando el modelo
+    const result = await User.deleteOne({ _id: new ObjectId(params.id) });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
         { error: "Usuario no encontrado" },
         { status: 404 }
-      )
+      );
     }
 
     return NextResponse.json(
       { message: "Usuario eliminado exitosamente" },
       { status: 200 }
-    )
+    );
   } catch (error) {
-    console.error("Error deleting user:", error)
+    console.error("Error deleting user:", error);
     return NextResponse.json(
       { error: "Error al eliminar el usuario" },
       { status: 500 }
-    )
+    );
   }
 } 
