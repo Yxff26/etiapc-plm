@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import TeacherDashboard from "@/components/dashboard/TeacherDashboard";
+import { TeacherDashboard } from "@/components/dashboard/TeacherDashboard";
 import CoordinatorDashboard from "@/components/dashboard/CoordinatorDashboard";
 import AdministratorDashboard from "@/components/dashboard/AdministratorDashboard";
 

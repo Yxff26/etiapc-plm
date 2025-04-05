@@ -5,7 +5,6 @@ import { signOut } from "next-auth/react"
 import {
   Home,
   User,
-  ClipboardCheck,
   BookOpen,
   Settings,
   HelpCircle,
@@ -14,6 +13,7 @@ import {
   ShieldCheck,
   GraduationCap,
   BarChart,
+  Calendar,
 } from "lucide-react"
 
 // Tipo de rol basado en el modelo de usuario
@@ -38,7 +38,7 @@ export function Sidebar({ userRole = "teacher" }: SidebarProps) {
   // Menú para profesores
   const teacherMenu = [
     { icon: Home, label: "Inicio", path: "/dashboard" },
-    { icon: ClipboardCheck, label: "Mis Evaluaciones", path: "/dashboard/teacher/evaluations" },
+    { icon: Calendar, label: "Mis Acompañamientos", path: "/dashboard/teacher/accompaniments" },
     { icon: BookOpen, label: "Mis Asignaturas", path: "/dashboard/teacher/subjects" },
     { icon: BarChart, label: "Mis Estadísticas", path: "/dashboard/teacher/stats" },
     { icon: User, label: "Mi Perfil", path: "/dashboard/teacher/profile" },
@@ -48,7 +48,7 @@ export function Sidebar({ userRole = "teacher" }: SidebarProps) {
   const coordinatorMenu = [
     { icon: Home, label: "Inicio", path: "/dashboard" },
     { icon: GraduationCap, label: "Profesores", path: "/dashboard/coordinator/teachers" },
-    { icon: ClipboardCheck, label: "Evaluaciones", path: "/dashboard/coordinator/evaluations" },
+    { icon: Calendar, label: "Acompañamientos", path: "/dashboard/coordinator/accompaniments" },
     { icon: BookOpen, label: "Asignaturas", path: "/dashboard/coordinator/subjects" },
     { icon: BarChart, label: "Reportes", path: "/dashboard/coordinator/reports" },
     { icon: User, label: "Mi Perfil", path: "/dashboard/coordinator/profile" },

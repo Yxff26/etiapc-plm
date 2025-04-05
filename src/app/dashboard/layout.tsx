@@ -39,7 +39,7 @@ export default function DashboardLayout({
       <div className="pl-64">
         <TopBar 
           userRole={userRole} 
-          userName={session.user.name || "Usuario"} 
+          userName={session.user.firstName || "Usuario"} 
           userEmail={session.user.email || "usuario@ejemplo.com"} 
         />
         <main className="p-6">

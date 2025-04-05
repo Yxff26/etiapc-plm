@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/db/mongodb"
 import { NextResponse } from "next/server"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const mongoose = await connectDB()
     
@@ -16,7 +16,14 @@ export async function GET() {
       throw new Error("Users collection not found")
     }
 
-    const users = await usersCollection.find({}, {
+    // Obtener el parámetro de consulta 'role'
+    const { searchParams } = new URL(request.url)
+    const role = searchParams.get('role')
+
+    // Construir el filtro basado en el rol
+    const filter = role ? { role } : {}
+
+    const users = await usersCollection.find(filter, {
       projection: {
         firstName: 1,
         lastName: 1,

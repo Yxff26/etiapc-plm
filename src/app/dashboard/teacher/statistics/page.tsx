@@ -5,9 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import axios from "axios"
 import { toast } from "sonner"
-import { Calendar, BookOpen, BarChart as BarChartIcon, User } from "lucide-react"
 
-interface DashboardStats {
+interface Statistics {
   totalAcompanamientos: number
   promedioGeneral: number
   promedioPlanificacion: number
@@ -24,20 +23,20 @@ interface DashboardStats {
   }>
 }
 
-export function TeacherDashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null)
+export default function TeacherStatisticsPage() {
+  const [statistics, setStatistics] = useState<Statistics | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchStats()
+    fetchStatistics()
   }, [])
 
-  const fetchStats = async () => {
+  const fetchStatistics = async () => {
     try {
       const response = await axios.get("/api/accompaniments/teacher/current")
-      setStats(response.data)
+      setStatistics(response.data)
     } catch (error) {
-      console.error("Error fetching dashboard stats:", error)
+      console.error("Error fetching statistics:", error)
       toast.error("Error al cargar las estadísticas")
     } finally {
       setLoading(false)
@@ -52,79 +51,66 @@ export function TeacherDashboard() {
     )
   }
 
-  if (!stats) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <p className="text-muted-foreground">No hay datos disponibles</p>
-      </div>
-    )
-  }
-
-  const formatNumber = (value: number | undefined) => {
-    if (value === undefined) return "0.0"
-    return value.toFixed(1)
+  if (!statistics) {
+    return null
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold">Estadísticas de Acompañamientos</h1>
         <p className="text-muted-foreground">
-          Bienvenido a tu panel de control
+          Análisis detallado de tus acompañamientos
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Acompañamientos
-            </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalAcompanamientos || 0}</div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Acompañamientos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statistics.totalAcompanamientos}</div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Promedio General
-            </CardTitle>
-            <BarChartIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.promedioGeneral)}/5</div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Promedio General
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statistics.promedioGeneral.toFixed(1)}/5</div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Promedio Planificación
-            </CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.promedioPlanificacion)}/5</div>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Promedio Planificación
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statistics.promedioPlanificacion.toFixed(1)}/5</div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Promedio Desarrollo
-            </CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.promedioDesarrollo)}/5</div>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Promedio Desarrollo
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{statistics.promedioDesarrollo.toFixed(1)}/5</div>
+            </CardContent>
+          </Card>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Evolución de Calificaciones</CardTitle>
@@ -132,7 +118,7 @@ export function TeacherDashboard() {
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.evolucion || []}>
+                <BarChart data={statistics.evolucion}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="fecha" 
@@ -156,7 +142,7 @@ export function TeacherDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {(stats.ultimosAcompanamientos || []).map((acompanamiento) => (
+              {statistics.ultimosAcompanamientos.map((acompanamiento) => (
                 <div
                   key={acompanamiento._id}
                   className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
@@ -170,11 +156,11 @@ export function TeacherDashboard() {
                     <div className="w-24 h-2 bg-muted rounded-full">
                       <div
                         className="h-full bg-primary rounded-full"
-                        style={{ width: `${((acompanamiento.promedio || 0) / 5) * 100}%` }}
+                        style={{ width: `${(acompanamiento.promedio / 5) * 100}%` }}
                       />
                     </div>
                     <span className="text-sm font-medium">
-                      {formatNumber(acompanamiento.promedio)}/5
+                      {acompanamiento.promedio.toFixed(1)}/5
                     </span>
                   </div>
                 </div>
@@ -185,5 +171,4 @@ export function TeacherDashboard() {
       </div>
     </div>
   )
-}
-
+} 

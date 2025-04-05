@@ -1,143 +1,192 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Search, Mail, Phone, GraduationCap, Star, Calendar } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Search,
+  Mail,
+  Phone,
+  GraduationCap,
+  Star,
+  Calendar,
+  Loader2,
+  BookOpen,
+  BarChart,
+  User,
+  PieChart,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+
+// React
+import { useState, useEffect } from "react";
+
+// Conexion de la Base de datos
+import { connectDB } from "@/lib/db/mongodb";
+import axios from "axios";
+
+// Interfaz de los datos de los profesores
+interface Teacher {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  isEmailVerified: boolean;
+  loginAttempts: number;
+  createdAt: string;
+  googleProfileImage: string;
+  authProvider: string;
+  subjects?: string[];
+}
+
+const roleLabels: Record<string, string> = {
+  teacher: "Profesor",
+};
 
 export default function CoordinatorTeachersPage() {
-  // Datos simulados de profesores
-  const teachers = [
-    {
-      id: 1,
-      name: "Juan Pérez",
-      email: "juan.perez@example.com",
-      phone: "+51 987 654 321",
-      specialization: "Matemáticas",
-      subjects: ["Cálculo", "Álgebra", "Geometría"],
-      rating: 4.5,
-      evaluations: 12,
-      status: "active",
-      avatar: "/placeholder.svg",
-      initials: "JP",
-    },
-    {
-      id: 2,
-      name: "María García",
-      email: "maria.garcia@example.com",
-      phone: "+51 987 654 322",
-      specialization: "Física",
-      subjects: ["Física General", "Mecánica", "Termodinámica"],
-      rating: 4.8,
-      evaluations: 15,
-      status: "active",
-      avatar: "/placeholder.svg",
-      initials: "MG",
-    },
-    {
-      id: 3,
-      name: "Carlos López",
-      email: "carlos.lopez@example.com",
-      phone: "+51 987 654 323",
-      specialization: "Química",
-      subjects: ["Química General", "Química Orgánica", "Bioquímica"],
-      rating: 4.2,
-      evaluations: 8,
-      status: "inactive",
-      avatar: "/placeholder.svg",
-      initials: "CL",
-    },
-  ]
+  const router = useRouter();
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
+
+  const fetchTeachers = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("/api/users?role=teacher");
+      console.log("Teachers fetched:", response.data);
+      setTeachers(response.data);
+    } catch (error) {
+      console.error("Error fetching teachers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfile = (teacherId: string) => {
+    router.push(`/dashboard/coordinator/teachers/${teacherId}`);
+  };
+
+  const handleNewAccompaniment = (teacherId: string) => {
+    console.log("Creating new accompaniment for teacher ID:", teacherId);
+    router.push(`/dashboard/coordinator/accompaniments/new?teacherId=${teacherId}`);
+  };
+
+  const handleEvaluations = (teacherId: string) => {
+    router.push(`/dashboard/coordinator/accompaniments?teacherId=${teacherId}`);
+  };
+
+  const filteredTeachers = teachers.filter(
+    (teacher) =>
+      teacher.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
       <div className="mb-8">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <User className="h-8 w-8" />
           <div>
-            <h1 className="text-2xl font-bold">Gestión de Profesores</h1>
+            <h1 className="text-2xl font-bold">Profesores</h1>
             <p className="text-muted-foreground">
-              Administra y monitorea el desempeño de los profesores
+              Gestiona la información de tus profesores
             </p>
           </div>
-          <Button>
-            <Calendar className="h-4 w-4 mr-2" />
-            Programar Evaluación
-          </Button>
         </div>
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar profesores..."
-              className="pl-9"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar profesores..."
+            className="pl-9"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
 
-      <div className="grid gap-6">
-        {teachers.map((teacher) => (
-          <Card key={teacher.id}>
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={teacher.avatar} />
-                    <AvatarFallback>{teacher.initials}</AvatarFallback>
-                  </Avatar>
+      {loading ? (
+        <div className="flex justify-center items-center h-full">
+          <Loader2 className="h-4 w-4 animate-spin" />
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {filteredTeachers.map((teacher) => (
+            <Card key={teacher._id}>
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-medium">{teacher.name}</h3>
-                      <Badge variant={teacher.status === "active" ? "default" : "secondary"}>
-                        {teacher.status === "active" ? "Activo" : "Inactivo"}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{teacher.specialization}</p>
+                    <h3 className="text-lg font-medium">
+                      {teacher.firstName} {teacher.lastName}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {teacher.email}
+                    </p>
+                    {teacher.subjects && teacher.subjects.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {teacher.subjects.map((subject, index) => (
+                          <Badge key={index} variant="outline">
+                            {subject}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleProfile(teacher._id)}
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      Perfil
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEvaluations(teacher._id)}
+                    >
+                      <PieChart className="h-4 w-4 mr-2" />
+                      Ver Acompañamientos
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleNewAccompaniment(teacher._id)}
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Nuevo Acompañamiento
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
-                    Ver perfil
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Evaluar
-                  </Button>
-                </div>
-              </div>
+              </CardContent>
+            </Card>
+          ))}
 
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{teacher.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{teacher.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{teacher.subjects.join(", ")}</span>
-                </div>
-              </div>
-
-              <div className="mt-4 flex items-center gap-4">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 text-yellow-400" />
-                  <span className="text-sm font-medium">{teacher.rating}/5</span>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {teacher.evaluations} evaluaciones realizadas
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+          {filteredTeachers.length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">
+                No se encontraron profesores que coincidan con tu búsqueda.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
-  )
-} 
+  );
+}
