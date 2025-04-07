@@ -14,22 +14,14 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log("Session user:", session.user)
-
     // Buscar el usuario por email
     const user = await User.findOne({ email: session.user.email })
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    console.log("Found user:", user)
-
     const accompaniments = await AccompanimentModel.find({ profesor: user._id })
-      .populate('profesor', 'firstName lastName')
-      .populate('coordinador', 'firstName lastName')
       .sort({ fecha: -1 })
-
-    console.log("Found accompaniments:", accompaniments)
 
     if (!accompaniments.length) {
       return NextResponse.json({
@@ -38,16 +30,15 @@ export async function GET() {
         promedioPlanificacion: 0,
         promedioDesarrollo: 0,
         promedioAspectosPedagogicos: 0,
-        evolucion: [],
-        ultimosAcompanamientos: []
+        evolucion: []
       })
     }
 
     // Calcular promedios
     const promedios = accompaniments.reduce((acc, curr) => {
-      const planificacion = Object.values(curr.instrumento.planificacion).reduce((a, b) => a + b, 0) / 5
-      const desarrollo = Object.values(curr.instrumento.desarrollo).reduce((a, b) => a + b, 0) / 4
-      const aspectosPedagogicos = Object.values(curr.instrumento.aspectosPedagogicos).reduce((a, b) => a + b, 0) / 4
+      const planificacion = Object.values(curr.instrumento.planificacion).reduce((a: number, b: number) => a + b, 0) / 5
+      const desarrollo = Object.values(curr.instrumento.desarrollo).reduce((a: number, b: number) => a + b, 0) / 4
+      const aspectosPedagogicos = Object.values(curr.instrumento.aspectosPedagogicos).reduce((a: number, b: number) => a + b, 0) / 4
       
       return {
         planificacion: acc.planificacion + planificacion,
@@ -64,9 +55,9 @@ export async function GET() {
 
     // Preparar datos de evolución
     const evolucion = accompaniments.map(acompanamiento => {
-      const planificacion = Object.values(acompanamiento.instrumento.planificacion).reduce((a, b) => a + b, 0) / 5
-      const desarrollo = Object.values(acompanamiento.instrumento.desarrollo).reduce((a, b) => a + b, 0) / 4
-      const aspectosPedagogicos = Object.values(acompanamiento.instrumento.aspectosPedagogicos).reduce((a, b) => a + b, 0) / 4
+      const planificacion = Object.values(acompanamiento.instrumento.planificacion).reduce((a: number, b: number) => a + b, 0) / 5
+      const desarrollo = Object.values(acompanamiento.instrumento.desarrollo).reduce((a: number, b: number) => a + b, 0) / 4
+      const aspectosPedagogicos = Object.values(acompanamiento.instrumento.aspectosPedagogicos).reduce((a: number, b: number) => a + b, 0) / 4
       const promedio = (planificacion + desarrollo + aspectosPedagogicos) / 3
 
       return {
@@ -75,32 +66,18 @@ export async function GET() {
       }
     }).sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
 
-    // Preparar últimos acompañamientos con toda la información necesaria
-    const ultimosAcompanamientos = accompaniments.map(acompanamiento => ({
-      _id: acompanamiento._id,
-      fecha: acompanamiento.fecha,
-      profesor: acompanamiento.profesor,
-      coordinador: acompanamiento.coordinador,
-      tipo: acompanamiento.tipo,
-      instrumento: acompanamiento.instrumento,
-      observaciones: acompanamiento.observaciones,
-      fortalezas: acompanamiento.fortalezas,
-      sugerencias: acompanamiento.sugerencias
-    }))
-
     return NextResponse.json({
       totalAcompanamientos: accompaniments.length,
       promedioGeneral,
       promedioPlanificacion,
       promedioDesarrollo,
       promedioAspectosPedagogicos,
-      evolucion,
-      ultimosAcompanamientos
+      evolucion
     })
   } catch (error) {
-    console.error('Error fetching teacher statistics:', error)
+    console.error('Error fetching teacher stats:', error)
     return NextResponse.json(
-      { error: 'Error al obtener las estadísticas' },
+      { error: 'Error al obtener las estadísticas del profesor' },
       { status: 500 }
     )
   }

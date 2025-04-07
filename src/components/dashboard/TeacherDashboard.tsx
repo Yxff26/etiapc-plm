@@ -17,19 +17,26 @@ interface DashboardStats {
     fecha: string
     promedio: number
   }>
-  ultimosAcompanamientos: Array<{
-    _id: string
-    fecha: string
-    promedio: number
-  }>
+}
+
+interface RecentAccompaniment {
+  _id: string
+  fecha: string
+  coordinador: {
+    firstName: string
+    lastName: string
+  }
+  promedio: number
 }
 
 export function TeacherDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [recentAccompaniments, setRecentAccompaniments] = useState<RecentAccompaniment[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchStats()
+    fetchRecentAccompaniments()
   }, [])
 
   const fetchStats = async () => {
@@ -39,6 +46,16 @@ export function TeacherDashboard() {
     } catch (error) {
       console.error("Error fetching dashboard stats:", error)
       toast.error("Error al cargar las estadísticas")
+    }
+  }
+
+  const fetchRecentAccompaniments = async () => {
+    try {
+      const response = await axios.get("/api/accompaniments/teacher/recent")
+      setRecentAccompaniments(response.data)
+    } catch (error) {
+      console.error("Error fetching recent accompaniments:", error)
+      toast.error("Error al cargar los últimos acompañamientos")
     } finally {
       setLoading(false)
     }
@@ -53,16 +70,7 @@ export function TeacherDashboard() {
   }
 
   if (!stats) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <p className="text-muted-foreground">No hay datos disponibles</p>
-      </div>
-    )
-  }
-
-  const formatNumber = (value: number | undefined) => {
-    if (value === undefined) return "0.0"
-    return value.toFixed(1)
+    return null
   }
 
   return (
@@ -83,7 +91,7 @@ export function TeacherDashboard() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalAcompanamientos || 0}</div>
+            <div className="text-2xl font-bold">{stats.totalAcompanamientos}</div>
           </CardContent>
         </Card>
 
@@ -95,7 +103,7 @@ export function TeacherDashboard() {
             <BarChartIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.promedioGeneral)}/5</div>
+            <div className="text-2xl font-bold">{stats.promedioGeneral.toFixed(1)}/5</div>
           </CardContent>
         </Card>
 
@@ -107,7 +115,7 @@ export function TeacherDashboard() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.promedioPlanificacion)}/5</div>
+            <div className="text-2xl font-bold">{stats.promedioPlanificacion.toFixed(1)}/5</div>
           </CardContent>
         </Card>
 
@@ -119,7 +127,7 @@ export function TeacherDashboard() {
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.promedioDesarrollo)}/5</div>
+            <div className="text-2xl font-bold">{stats.promedioDesarrollo.toFixed(1)}/5</div>
           </CardContent>
         </Card>
       </div>
@@ -132,7 +140,7 @@ export function TeacherDashboard() {
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.evolucion || []}>
+                <BarChart data={stats.evolucion}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="fecha" 
@@ -151,12 +159,12 @@ export function TeacherDashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
+                <CardHeader>
             <CardTitle>Últimos Acompañamientos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {(stats.ultimosAcompanamientos || []).map((acompanamiento) => (
+              {recentAccompaniments.map((acompanamiento) => (
                 <div
                   key={acompanamiento._id}
                   className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
@@ -165,23 +173,26 @@ export function TeacherDashboard() {
                     <p className="font-medium">
                       {new Date(acompanamiento.fecha).toLocaleDateString()}
                     </p>
+                    <p className="text-sm text-muted-foreground">
+                      {acompanamiento.coordinador.firstName} {acompanamiento.coordinador.lastName}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-24 h-2 bg-muted rounded-full">
                       <div
                         className="h-full bg-primary rounded-full"
-                        style={{ width: `${((acompanamiento.promedio || 0) / 5) * 100}%` }}
+                        style={{ width: `${(acompanamiento.promedio / 5) * 100}%` }}
                       />
                     </div>
                     <span className="text-sm font-medium">
-                      {formatNumber(acompanamiento.promedio)}/5
+                      {acompanamiento.promedio.toFixed(1)}/5
                     </span>
                   </div>
                 </div>
               ))}
             </div>
           </CardContent>
-        </Card>
+              </Card>
       </div>
     </div>
   )

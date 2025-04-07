@@ -12,7 +12,6 @@ import {
   GraduationCap,
   Calendar,
   BookOpen,
-  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -85,75 +84,54 @@ export default function CoordinatorDashboard() {
       icon: BookOpen,
       href: "/dashboard/coordinator/subjects",
     },
-    {
-      title: "Reportes",
-      description: "Ver reportes y análisis",
-      icon: FileText,
-      href: "/dashboard/coordinator/reports",
-    },
   ];
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants}>
-      <motion.div className="mb-8" variants={itemVariants}>
-        <h1 className="text-2xl font-bold">Panel de Coordinación</h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Panel de Coordinador</h1>
         <p className="text-muted-foreground">
-          Bienvenido al panel de coordinación. Aquí tienes un resumen de tu
-          área.
+          Gestión y seguimiento de acompañamientos
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 mb-6"
-        variants={containerVariants}
-      >
-        <motion.div variants={itemVariants}>
-          <StatCard
-            title="Total Profesores"
-            value={stats.teachers || 0}
-            description="Profesores activos"
-            icon={GraduationCap}
-            color="primary"
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <StatCard
-            title="Acompañamientos Realizados"
-            value={stats.completedAccompaniments || 0}
-            description="Completados"
-            icon={Calendar}
-            color="secondary"
-          />
-        </motion.div>
-      </motion.div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <StatCard
+          title="Total de Profesores"
+          value={stats.teachers}
+          icon={GraduationCap}
+          description="Profesores registrados"
+        />
+        <StatCard
+          title="Acompañamientos Realizados"
+          value={stats.completedAccompaniments}
+          icon={Calendar}
+          description="Total de acompañamientos"
+        />
+      </div>
 
-      <motion.div
-        className="grid gap-6 md:grid-cols-2"
-        variants={containerVariants}
-      >
-        {quickLinks.map((link) => (
+      <div className="grid gap-4 md:grid-cols-3">
+        {quickLinks.map((link, index) => (
           <motion.div
             key={link.title}
             variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
+            initial="hidden"
+            animate="visible"
           >
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <link.icon className="h-5 w-5" />
-                  <CardTitle>{link.title}</CardTitle>
-                </div>
-                <CardDescription>{link.description}</CardDescription>
-              </CardHeader>
-              <Link href={link.href}>
-                <CardContent className="text-sm text-blue-500 hover:underline mt-2">
-                  Ir a sección →
-                </CardContent>
-              </Link>
-            </Card>
+            <Link href={link.href}>
+              <Card className="h-full hover:bg-accent transition-colors">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <link.icon className="h-5 w-5" />
+                    <CardTitle className="text-lg">{link.title}</CardTitle>
+                  </div>
+                  <CardDescription>{link.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
           </motion.div>
         ))}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

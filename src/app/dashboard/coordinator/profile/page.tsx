@@ -18,7 +18,7 @@ interface UserProfile {
   avatar: string
 }
 
-export default function TeacherProfilePage() {
+export default function CoordinatorProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
@@ -109,18 +109,18 @@ export default function TeacherProfilePage() {
 
   return (
     <div className="space-y-6">
-    <div>
+      <div>
         <h1 className="text-2xl font-bold">Mi Perfil</h1>
         <p className="text-muted-foreground">
           Gestiona tu información personal
         </p>
       </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Información Personal</CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>Información Personal</CardTitle>
+        </CardHeader>
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center gap-6 mb-6">
               <div className="relative">
@@ -221,8 +221,8 @@ export default function TeacherProfilePage() {
               )}
             </div>
           </form>
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
     </div>
   )
 } 
