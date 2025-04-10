@@ -74,15 +74,15 @@ export function TeacherDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Dashboard</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Bienvenido a tu panel de control
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -132,10 +132,10 @@ export function TeacherDashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Evolución de Calificaciones</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Evolución de Calificaciones</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -159,15 +159,15 @@ export function TeacherDashboard() {
         </Card>
 
         <Card>
-                <CardHeader>
-            <CardTitle>Últimos Acompañamientos</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-base sm:text-lg">Últimos Acompañamientos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentAccompaniments.map((acompanamiento) => (
                 <div
                   key={acompanamiento._id}
-                  className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-muted/50 rounded-lg gap-2"
                 >
                   <div>
                     <p className="font-medium">
@@ -177,7 +177,7 @@ export function TeacherDashboard() {
                       {acompanamiento.coordinador.firstName} {acompanamiento.coordinador.lastName}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <div className="w-24 h-2 bg-muted rounded-full">
                       <div
                         className="h-full bg-primary rounded-full"
@@ -192,7 +192,7 @@ export function TeacherDashboard() {
               ))}
             </div>
           </CardContent>
-              </Card>
+        </Card>
       </div>
     </div>
   )

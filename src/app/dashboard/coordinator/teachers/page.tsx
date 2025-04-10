@@ -96,29 +96,27 @@ export default function CoordinatorTeachersPage() {
   );
 
   return (
-    <div>
-      <div className="mb-8">
+    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex items-center gap-4">
-          <User className="h-8 w-8" />
+          <User className="h-6 w-6 sm:h-8 sm:w-8" />
           <div>
-            <h1 className="text-2xl font-bold">Profesores</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Profesores</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Gestiona la información de tus profesores
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar profesores..."
-            className="pl-9"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+      <div className="relative w-full sm:max-w-sm">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar profesores..."
+          className="pl-9"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {loading ? (
@@ -126,20 +124,30 @@ export default function CoordinatorTeachersPage() {
           <Loader2 className="h-4 w-4 animate-spin" />
         </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filteredTeachers.map((teacher) => (
             <Card key={teacher._id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium">
-                      {teacher.firstName} {teacher.lastName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {teacher.email}
-                    </p>
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={teacher.googleProfileImage} />
+                        <AvatarFallback>
+                          {teacher.firstName[0]}{teacher.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-medium">
+                          {teacher.firstName} {teacher.lastName}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {teacher.email}
+                        </p>
+                      </div>
+                    </div>
                     {teacher.subjects && teacher.subjects.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1">
                         {teacher.subjects.map((subject, index) => (
                           <Badge key={index} variant="outline">
                             {subject}
@@ -148,10 +156,11 @@ export default function CoordinatorTeachersPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="w-full sm:w-auto"
                       onClick={() => handleProfile(teacher._id)}
                     >
                       <User className="h-4 w-4 mr-2" />
@@ -160,6 +169,7 @@ export default function CoordinatorTeachersPage() {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="w-full sm:w-auto"
                       onClick={() => handleEvaluations(teacher._id)}
                     >
                       <PieChart className="h-4 w-4 mr-2" />
@@ -167,6 +177,7 @@ export default function CoordinatorTeachersPage() {
                     </Button>
                     <Button
                       size="sm"
+                      className="w-full sm:w-auto"
                       onClick={() => handleNewAccompaniment(teacher._id)}
                     >
                       <Calendar className="h-4 w-4 mr-2" />
@@ -179,7 +190,7 @@ export default function CoordinatorTeachersPage() {
           ))}
 
           {filteredTeachers.length === 0 && (
-            <div className="text-center py-10">
+            <div className="col-span-full text-center py-10">
               <p className="text-muted-foreground">
                 No se encontraron profesores que coincidan con tu búsqueda.
               </p>

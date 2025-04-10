@@ -89,22 +89,22 @@ export default function AdministratorUsersPage() {
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
-            <p className="text-muted-foreground">
-              Administra los usuarios del sistema
-            </p>
-          </div>
-        <Button onClick={handleExportUsers}>
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">Gestión de Usuarios</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Administra los usuarios del sistema
+          </p>
+        </div>
+        <Button onClick={handleExportUsers} className="w-full sm:w-auto">
           <FileDown className="h-4 w-4 mr-2" />
           Exportar Usuarios
-          </Button>
+        </Button>
       </div>
 
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <UsersTable
             users={users}
             onUserUpdated={fetchUsers}

@@ -77,15 +77,19 @@ export default function AdministratorDashboard() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
+      className="p-4 sm:p-6 max-w-7xl mx-auto"
     >
-      <motion.div className="mb-8" variants={itemVariants}>
-        <h1 className="text-2xl font-bold">Panel de Administración</h1>
-        <p className="text-muted-foreground">
+      <motion.div className="mb-6 sm:mb-8" variants={itemVariants}>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Panel de Administración</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-2">
           Bienvenido al panel de administración. Aquí tienes un resumen del sistema.
         </p>
       </motion.div>
 
-      <motion.div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6" variants={containerVariants}>
+      <motion.div 
+        className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8" 
+        variants={containerVariants}
+      >
         <motion.div variants={itemVariants}>
           <StatCard
             title="Total Usuarios"
@@ -110,7 +114,7 @@ export default function AdministratorDashboard() {
             value={stats.coordinators}
             description="Coordinadores activos"
             icon={Users}
-            color="accent"
+            color="default"
           />
         </motion.div>
         <motion.div variants={itemVariants}>
@@ -124,17 +128,22 @@ export default function AdministratorDashboard() {
         </motion.div>
       </motion.div>
 
-      <motion.div className="grid gap-6 md:grid-cols-2" variants={containerVariants}>
+      <motion.div 
+        className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
+        variants={containerVariants}
+      >
         {quickLinks.map((link, index) => (
           <motion.div key={link.title} variants={itemVariants}>
             <Link href={link.href}>
-              <Card className="hover:bg-accent/50 transition-colors">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <link.icon className="h-5 w-5" />
-                    <CardTitle>{link.title}</CardTitle>
+              <Card className="hover:bg-accent/50 transition-colors h-full border-2 hover:border-primary/50">
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <link.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-base sm:text-lg">{link.title}</CardTitle>
                   </div>
-                  <CardDescription>{link.description}</CardDescription>
+                  <CardDescription className="text-sm sm:text-base mt-2">{link.description}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>

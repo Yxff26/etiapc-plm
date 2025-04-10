@@ -4,7 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Search, FileText, Download, Calendar, BarChart, PieChart, LineChart, Users } from "lucide-react"
+import { Search, FileText, Download, Calendar, BarChart, PieChart, LineChart, Users, MoreHorizontal } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function AdministratorReportsPage() {
   // Datos simulados de reportes
@@ -42,153 +45,152 @@ export default function AdministratorReportsPage() {
   ]
 
   return (
-    <div>
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Reportes del Sistema</h1>
-            <p className="text-muted-foreground">
-              Genera y visualiza reportes del sistema
-            </p>
-          </div>
-          <Button>
-            <FileText className="h-4 w-4 mr-2" />
-            Nuevo Reporte
-          </Button>
-        </div>
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Reportes</h1>
+        <p className="text-sm sm:text-base text-muted-foreground mt-2">
+          Visualiza y gestiona los reportes del sistema
+        </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-4 mb-6">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Reportes</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Reportes Totales</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Total de reportes generados</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">25</div>
-            <p className="text-xs text-muted-foreground">
-              +5 desde el mes anterior
-            </p>
+            <div className="text-2xl sm:text-3xl font-bold">{reports.length}</div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Usuarios Activos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Reportes Pendientes</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Reportes por revisar</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45</div>
-            <p className="text-xs text-muted-foreground">
-              +3 desde el mes anterior
-            </p>
+            <div className="text-2xl sm:text-3xl font-bold">
+              {reports.filter(r => r.status === 'pending').length}
+            </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Evaluaciones</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Reportes Completados</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Reportes finalizados</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">120</div>
-            <p className="text-xs text-muted-foreground">
-              +15 desde el mes anterior
-            </p>
+            <div className="text-2xl sm:text-3xl font-bold">
+              {reports.filter(r => r.status === 'completed').length}
+            </div>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En Proceso</CardTitle>
-            <PieChart className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base sm:text-lg">Reportes Rechazados</CardTitle>
+            <CardDescription className="text-sm sm:text-base">Reportes no aprobados</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">
-              +2 desde el mes anterior
-            </p>
+            <div className="text-2xl sm:text-3xl font-bold">
+              {reports.filter(r => r.status === 'rejected').length}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      <Card>
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-base sm:text-lg">Lista de Reportes</CardTitle>
+              <CardDescription className="text-sm sm:text-base">
+                Gestiona los reportes del sistema
+              </CardDescription>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <Input
               placeholder="Buscar reportes..."
-              className="pl-9"
-            />
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full sm:w-[200px]"
+              />
+              <Select
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+              >
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="pending">Pendientes</SelectItem>
+                  <SelectItem value="completed">Completados</SelectItem>
+                  <SelectItem value="rejected">Rechazados</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6">
-        {reports.map((report) => (
-          <Card key={report.id}>
-            <CardContent className="pt-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-medium">{report.title}</h3>
-                    <Badge variant="outline">{report.category}</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{report.description}</p>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full overflow-x-auto rounded-lg border">
+            <div className="min-w-[800px]">
+              {filteredReports.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="text-muted-foreground">No se encontraron reportes</p>
                 </div>
-                <Badge
-                  variant={
-                    report.status === "completed"
-                      ? "default"
-                      : report.status === "processing"
-                      ? "secondary"
-                      : "destructive"
-                  }
-                >
-                  {report.status === "completed"
-                    ? "Completado"
-                    : report.status === "processing"
-                    ? "En Proceso"
-                    : "Pendiente"}
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[200px]">Título</TableHead>
+                      <TableHead>Descripción</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports.map((report) => (
+                      <TableRow key={report.id}>
+                        <TableCell className="font-medium">{report.title}</TableCell>
+                        <TableCell className="max-w-[300px] truncate">{report.description}</TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusBadgeVariant(report.status)}>
+                            {getStatusLabel(report.status)}
                 </Badge>
-              </div>
-
-              <div className="mt-4 grid gap-4 md:grid-cols-3">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    <span className="font-medium">Fecha:</span> {report.date}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    <span className="font-medium">Formato:</span> {report.format}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <LineChart className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">
-                    <span className="font-medium">Tipo:</span> {report.type}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-4 flex justify-end gap-2">
-                <Button variant="outline" size="sm">
+                        </TableCell>
+                        <TableCell>
+                          {new Date(report.date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleView(report)}>
                   Ver detalles
-                </Button>
-                {report.status === "completed" && (
-                  <Button size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Descargar
-                  </Button>
-                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEdit(report)}>
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDelete(report.id)}>
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
     </div>
   )
 } 

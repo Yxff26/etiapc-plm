@@ -24,11 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, ChevronDown, ChevronUp, Search } from "lucide-react"
+import { MoreHorizontal, Search } from "lucide-react"
 import { useState } from "react"
 import { EditUserModal } from "./EditUserModal"
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { getInitials } from "@/utils/getInitials"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 interface User {
   _id: string
@@ -41,6 +42,8 @@ interface User {
   createdAt: string
   image: string | null
   authProvider: string
+  lastLogin?: string
+  googleProfileImage?: string
 }
 
 interface UsersTableProps {
@@ -97,13 +100,13 @@ export function UsersTable({ users, onUserUpdated, onUserDeleted }: UsersTablePr
     }
   }
 
-  const handleEditClick = (user: User) => {
+  const handleEdit = (user: User) => {
     setSelectedUser(user)
     setIsEditModalOpen(true)
   }
 
-  const handleDeleteClick = (user: User) => {
-    setUserToDelete(user)
+  const handleDelete = (userId: string) => {
+    setUserToDelete(users.find(u => u._id === userId) || null)
   }
 
   const handleConfirmDelete = () => {
@@ -113,10 +116,37 @@ export function UsersTable({ users, onUserUpdated, onUserDeleted }: UsersTablePr
     }
   }
 
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case "administrator":
+        return "destructive"
+      case "coordinator":
+        return "default"
+      case "teacher":
+        return "secondary"
+      default:
+        return "outline"
+    }
+  }
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case "administrator":
+        return "Administrador"
+      case "coordinator":
+        return "Coordinador"
+      case "teacher":
+        return "Profesor"
+      default:
+        return role
+    }
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
+    <div className="w-full overflow-x-auto rounded-lg border">
+      <div className="min-w-[800px]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-b">
+          <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar usuarios..."
@@ -125,107 +155,61 @@ export function UsersTable({ users, onUserUpdated, onUserDeleted }: UsersTablePr
             className="pl-9"
           />
         </div>
-        <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-[180px]">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Select
+              value={roleFilter}
+              onValueChange={setRoleFilter}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filtrar por rol" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los roles</SelectItem>
-            <SelectItem value="administrator">Administrador</SelectItem>
-            <SelectItem value="coordinator">Coordinador</SelectItem>
-            <SelectItem value="teacher">Profesor</SelectItem>
+                <SelectItem value="teacher">Profesores</SelectItem>
+                <SelectItem value="coordinator">Coordinadores</SelectItem>
+                <SelectItem value="administrator">Administradores</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrar por estado" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los estados</SelectItem>
-            <SelectItem value="verified">Verificado</SelectItem>
-            <SelectItem value="pending">Pendiente</SelectItem>
-          </SelectContent>
-        </Select>
+          </div>
       </div>
 
-      <div className="rounded-md border">
+        {filteredUsers.length === 0 ? (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">No se encontraron usuarios</p>
+          </div>
+        ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Usuario</TableHead>
-              <TableHead 
-                className="cursor-pointer"
-                onClick={() => handleSort("email")}
-              >
-                <div className="flex items-center gap-1">
-                  Email
-                  {sortField === "email" && (
-                    sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
-                  )}
-                </div>
-              </TableHead>
-              <TableHead 
-                className="cursor-pointer"
-                onClick={() => handleSort("role")}
-              >
-                <div className="flex items-center gap-1">
-                  Rol
-                  {sortField === "role" && (
-                    sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
-                  )}
-                </div>
-              </TableHead>
+                <TableHead className="w-[200px]">Usuario</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Rol</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead 
-                className="cursor-pointer"
-                onClick={() => handleSort("createdAt")}
-              >
-                <div className="flex items-center gap-1">
-                  Fecha de registro
-                  {sortField === "createdAt" && (
-                    sortDirection === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
-                  )}
-                </div>
-              </TableHead>
-              <TableHead className="w-[100px]">Acciones</TableHead>
+                <TableHead>Último acceso</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedUsers.map((user) => (
               <TableRow key={user._id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      {user.image ? (
-                        <img
-                          src={user.image}
-                          alt={`${user.firstName} ${user.lastName}`}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-sm font-semibold text-gray-600">
-                            {getInitials(user.firstName, user.lastName)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.image || user.googleProfileImage || ""} />
+                        <AvatarFallback>{getInitials(user.firstName, user.lastName)}</AvatarFallback>
+                      </Avatar>
                     <div>
-                      <div className="font-medium">
-                        {user.firstName && user.lastName
-                          ? `${user.firstName} ${user.lastName}`
-                          : "Usuario sin nombre"}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.authProvider === "google" ? "Google" : "Email"}
+                        <div className="font-medium">{user.firstName} {user.lastName}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(user.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell>{user.email}</TableCell>
+                  <TableCell className="max-w-[200px] truncate">{user.email}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="capitalize">
-                    {user.role}
+                    <Badge variant={getRoleBadgeVariant(user.role)}>
+                      {getRoleLabel(user.role)}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -234,9 +218,9 @@ export function UsersTable({ users, onUserUpdated, onUserDeleted }: UsersTablePr
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {new Date(user.createdAt).toLocaleDateString()}
+                    {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : "Nunca"}
                 </TableCell>
-                <TableCell>
+                  <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="h-8 w-8 p-0">
@@ -244,13 +228,10 @@ export function UsersTable({ users, onUserUpdated, onUserDeleted }: UsersTablePr
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEditClick(user)}>
+                        <DropdownMenuItem onClick={() => handleEdit(user)}>
                         Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="text-red-600"
-                        onClick={() => handleDeleteClick(user)}
-                      >
+                        <DropdownMenuItem onClick={() => handleDelete(user._id)}>
                         Eliminar
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -260,6 +241,7 @@ export function UsersTable({ users, onUserUpdated, onUserDeleted }: UsersTablePr
             ))}
           </TableBody>
         </Table>
+        )}
       </div>
 
       <EditUserModal

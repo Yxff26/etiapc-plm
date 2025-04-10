@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "sonner"
-import axios from "axios"
 
 interface User {
   _id: string
@@ -16,10 +21,6 @@ interface User {
   email: string
   role: string
   isEmailVerified: boolean
-  loginAttempts: number
-  createdAt: string
-  googleProfileImage?: string
-  authProvider: string
 }
 
 interface EditUserModalProps {
@@ -30,41 +31,59 @@ interface EditUserModalProps {
 }
 
 export function EditUserModal({ user, isOpen, onClose, onUserUpdated }: EditUserModalProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    email: user?.email || "",
-    role: user?.role || "teacher",
+  const [formData, setFormData] = useState<User>({
+    _id: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+    isEmailVerified: false
   })
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Establecer datos iniciales cuando el usuario cambie o el modal se abra
   useEffect(() => {
     if (user) {
       setFormData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        email: user.email || '',
-        role: user.role || 'user'
-      });
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified
+      })
     }
-  }, [user, isOpen]);
+  }, [user])
+
+  const handleInputChange = (field: keyof User, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      const response = await axios.put(`/api/users/${user?._id}`, formData)
-      
-      if (response.status === 200) {
-        toast.success("Usuario actualizado exitosamente")
-        onUserUpdated()
-        onClose()
+      const response = await fetch(`/api/users/${formData._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al actualizar el usuario")
       }
+
+      toast.success("Usuario actualizado correctamente")
+      onUserUpdated()
+      onClose()
     } catch (error) {
-      console.error("Error updating user:", error)
       toast.error("Error al actualizar el usuario")
+      console.error(error)
     } finally {
       setIsLoading(false)
     }
@@ -77,14 +96,13 @@ export function EditUserModal({ user, isOpen, onClose, onUserUpdated }: EditUser
           <DialogTitle>Editar Usuario</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="firstName">Nombre</Label>
               <Input
                 id="firstName"
                 value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                required
+                onChange={(e) => handleInputChange('firstName', e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -92,29 +110,29 @@ export function EditUserModal({ user, isOpen, onClose, onUserUpdated }: EditUser
               <Input
                 id="lastName"
                 value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                required
+                onChange={(e) => handleInputChange('lastName', e.target.value)}
               />
             </div>
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
+            <Label htmlFor="email">Correo electrónico</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
+              onChange={(e) => handleInputChange('email', e.target.value)}
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="role">Rol</Label>
             <Select
               value={formData.role}
-              onValueChange={(value) => setFormData({ ...formData, role: value })}
+              onValueChange={(value) => handleInputChange('role', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecciona un rol" />
+                <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="teacher">Profesor</SelectItem>
@@ -123,12 +141,13 @@ export function EditUserModal({ user, isOpen, onClose, onUserUpdated }: EditUser
               </SelectContent>
             </Select>
           </div>
-          <div className="flex justify-end gap-2">
+
+          <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Guardando..." : "Guardar Cambios"}
+              {isLoading ? "Guardando..." : "Guardar cambios"}
             </Button>
           </div>
         </form>

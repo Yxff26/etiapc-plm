@@ -17,7 +17,9 @@ import {
   ClipboardList,
   Menu,
   X,
-  FileText
+  FileText,
+  LayoutDashboard,
+  BarChart3
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -28,9 +30,10 @@ type UserRole = "teacher" | "coordinator" | "administrator"
 
 interface SidebarProps {
   userRole?: UserRole
+  className?: string
 }
 
-export function Sidebar({ userRole = "teacher" }: SidebarProps) {
+export function Sidebar({ userRole = "teacher", className }: SidebarProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -51,25 +54,20 @@ export function Sidebar({ userRole = "teacher" }: SidebarProps) {
   // Menú para profesores
   const teacherMenuItems = [
     {
-      href: "/dashboard",
       label: "Inicio",
-      icon: Home
+      href: "/dashboard",
+      icon: Home,
     },
     {
+      label: "Acompañamientos",
       href: "/dashboard/teacher/accompaniments",
-      label: "Mis Acompañamientos",
-      icon: ClipboardList
+      icon: Users,
     },
     {
-      href: "/dashboard/teacher/stats",
-      label: "Mis Estadísticas",
-      icon: BarChart
-    },
-    {
+      label: "Perfil",
       href: "/dashboard/teacher/profile",
-      label: "Mi Perfil",
-      icon: User
-    }
+      icon: User,
+    },
   ]
 
   // Menú para coordinadores
@@ -128,90 +126,70 @@ export function Sidebar({ userRole = "teacher" }: SidebarProps) {
   // Seleccionar el menú según el rol
   const menuItems = userRole === "administrator" ? adminMenuItems : userRole === "coordinator" ? coordinatorMenuItems : teacherMenuItems
 
+  const handleLogout = () => {
+    signOut({ callbackUrl: "/auth/login" })
+  }
+
   return (
-    <>
-      {/* Botón de menú para móviles */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed top-4 left-4 z-50 md:hidden bg-white shadow-sm"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
-
-      {/* Overlay para móviles */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      <aside
-        className={cn(
-          "fixed left-0 top-0 h-full w-64 bg-primary text-white p-4 flex flex-col transition-transform duration-300 z-50",
-          "md:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:shadow-lg"
-        )}
-      >
-        <div className="mb-8 px-4">
-          <Link 
-            href={`/dashboard/${userRole}`} 
-            className="flex items-center gap-2 hover:opacity-90 transition-opacity"
-          >
-            <img 
-              src="/Logo.png" 
-              alt="ETIAPC Logo" 
-              className="h-12 w-auto object-contain"
+    <aside className="h-full bg-primary text-primary-foreground">
+      <div className="flex flex-col h-full">
+        {/* Logo and Title */}
+        <div className="flex items-center justify-between p-4 border-b border-primary-foreground/10">
+          <Link href={`/dashboard/${userRole}`} className="flex items-center gap-2">
+            <img
+              src="/Logo.png"
+              alt="Logo ETIAPC"
+              className="h-12 w-auto"
             />
             <span className="text-xl font-bold">ETIAPC</span>
           </Link>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto">
-          {menuItems.map((item) => (
-            <Button
-              key={item.href}
-              variant="ghost"
-              className={cn(
-                "w-full justify-start hover:bg-white/10 transition-colors",
-                isActive(item.href) ? "bg-white/20 text-white" : "text-white/80"
-              )}
-              asChild
-            >
-              <Link href={item.href}>
-                <item.icon className="mr-2 h-4 w-4" />
-                {item.label}
-              </Link>
-            </Button>
-          ))}
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          <ul className="space-y-1 px-2">
+            {menuItems.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                    pathname === item.href
+                      ? "bg-primary-foreground/10 text-primary-foreground"
+                      : "text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground"
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </nav>
 
-        <div className="mt-auto pt-4 space-y-1">
-          <Link
-            href="/dashboard/help"
-            className={cn(
-              "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
-              isActive("/dashboard/help")
-                ? "bg-white/20 text-white font-medium"
-                : "text-white/80 hover:bg-white/10 hover:text-white"
-            )}
-          >
-            <HelpCircle className="h-5 w-5" />
-            <span>Ayuda</span>
-          </Link>
-
-          <button
-            onClick={() => signOut({ callbackUrl: "/auth/login" })}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            <span>Cerrar Sesión</span>
-          </button>
+        {/* Help and Logout */}
+        <div className="border-t border-primary-foreground/10 p-4">
+          <ul className="space-y-1">
+            <li>
+              <Link
+                href="/dashboard/help"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground transition-colors"
+              >
+                <HelpCircle className="h-5 w-5" />
+                <span>Ayuda</span>
+              </Link>
+            </li>
+            <li>
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+                <span>Cerrar sesión</span>
+              </button>
+            </li>
+          </ul>
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   )
 } 
