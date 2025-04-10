@@ -13,6 +13,7 @@ import {
 import { signOut, useSession } from "next-auth/react"
 import Link from "next/link"
 import { Switch } from "@/components/ui/switch"
+import { useTheme } from "next-themes"
 
 // Simulación de rol de usuario - en una aplicación real, esto vendría de tu sistema de autenticación
 type UserRole = "teacher" | "coordinator" | "administrator"
@@ -31,6 +32,7 @@ export function TopBar({
   setIsSidebarOpen 
 }: TopBarProps) {
   const { data: session } = useSession()
+  const { theme, setTheme } = useTheme()
 
   const getDashboardTitle = (role: UserRole) => {
     switch (role) {
@@ -53,14 +55,14 @@ export function TopBar({
   const userImage = session?.user?.image || ""
 
   return (
-    <header className={`sticky top-0 z-40 w-full border-b bg-background ${className}`}>
+    <header className={`sticky top-0 z-40 w-full border-b bg-background dark:bg-background/95 dark:border-border/40 ${className}`}>
       <div className="flex h-16 items-center px-4 sm:px-6">
         <div className="flex flex-1 items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden hover:bg-accent dark:hover:bg-accent/50"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
               <Menu className="h-6 w-6" />
@@ -72,14 +74,17 @@ export function TopBar({
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Sun className="h-4 w-4" />
-              <Switch disabled />
-              <Moon className="h-4 w-4" />
+              <Sun className="h-4 w-4 text-muted-foreground dark:text-muted-foreground/80" />
+              <Switch 
+                checked={theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
+              <Moon className="h-4 w-4 text-muted-foreground dark:text-muted-foreground/80" />
             </div>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-accent dark:hover:bg-accent/50">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={userImage} alt={userName} />
                     <AvatarFallback>{getInitials(userName)}</AvatarFallback>
@@ -97,19 +102,19 @@ export function TopBar({
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/${userRole}/profile`}>
+                  <Link href={`/dashboard/${userRole}/profile`} className="cursor-pointer">
                     <User className="mr-2 h-4 w-4" />
                     <span>Perfil</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/${userRole}/settings`}>
+                  <Link href={`/dashboard/${userRole}/settings`} className="cursor-pointer">
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Configuración</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/auth/login" })}>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/auth/login" })} className="cursor-pointer">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Cerrar sesión</span>
                 </DropdownMenuItem>

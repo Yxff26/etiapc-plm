@@ -89,7 +89,7 @@ export default function CoordinatorDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Panel de Coordinador</h1>
+        <h1 className="text-2xl font-bold text-foreground">Panel de Coordinador</h1>
         <p className="text-muted-foreground">
           Gestión y seguimiento de acompañamientos
         </p>
@@ -119,13 +119,13 @@ export default function CoordinatorDashboard() {
             animate="visible"
           >
             <Link href={link.href}>
-              <Card className="h-full hover:bg-accent transition-colors">
+              <Card className="h-full hover:bg-accent/50 dark:hover:bg-accent/30 transition-colors bg-card dark:bg-card/90">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <link.icon className="h-5 w-5" />
-                    <CardTitle className="text-lg">{link.title}</CardTitle>
+                    <link.icon className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle className="text-lg text-card-foreground">{link.title}</CardTitle>
                   </div>
-                  <CardDescription>{link.description}</CardDescription>
+                  <CardDescription className="text-muted-foreground">{link.description}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>

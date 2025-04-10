@@ -131,10 +131,10 @@ export function Sidebar({ userRole = "teacher", className }: SidebarProps) {
   }
 
   return (
-    <aside className="h-full bg-primary text-primary-foreground">
+    <aside className="h-full bg-primary text-primary-foreground dark:bg-primary/90">
       <div className="flex flex-col h-full">
         {/* Logo and Title */}
-        <div className="flex items-center justify-between p-4 border-b border-primary-foreground/10">
+        <div className="flex items-center justify-between p-4 border-b border-primary-foreground/10 dark:border-primary-foreground/20">
           <Link href={`/dashboard/${userRole}`} className="flex items-center gap-2">
             <img
               src="/Logo.png"
@@ -154,8 +154,8 @@ export function Sidebar({ userRole = "teacher", className }: SidebarProps) {
                   href={item.href}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                     pathname === item.href
-                      ? "bg-primary-foreground/10 text-primary-foreground"
-                      : "text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground"
+                      ? "bg-primary-foreground/10 text-primary-foreground dark:bg-primary-foreground/20"
+                      : "text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground dark:text-primary-foreground/80 dark:hover:bg-primary-foreground/10"
                   }`}
                 >
                   <item.icon className="h-5 w-5" />
@@ -167,12 +167,12 @@ export function Sidebar({ userRole = "teacher", className }: SidebarProps) {
         </nav>
 
         {/* Help and Logout */}
-        <div className="border-t border-primary-foreground/10 p-4">
+        <div className="border-t border-primary-foreground/10 dark:border-primary-foreground/20 p-4">
           <ul className="space-y-1">
             <li>
               <Link
                 href="/dashboard/help"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground transition-colors"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground dark:text-primary-foreground/80 dark:hover:bg-primary-foreground/10 transition-colors"
               >
                 <HelpCircle className="h-5 w-5" />
                 <span>Ayuda</span>
@@ -181,7 +181,7 @@ export function Sidebar({ userRole = "teacher", className }: SidebarProps) {
             <li>
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground transition-colors"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-primary-foreground/70 hover:bg-primary-foreground/5 hover:text-primary-foreground dark:text-primary-foreground/80 dark:hover:bg-primary-foreground/10 transition-colors"
               >
                 <LogOut className="h-5 w-5" />
                 <span>Cerrar sesión</span>

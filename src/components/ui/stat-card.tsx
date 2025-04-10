@@ -48,13 +48,13 @@ export function StatCard({ title, value, description, icon: Icon, trend, color =
   }
 
   return (
-    <Card className={`transition-all duration-200 hover:shadow-md ${getColorClass()}`}>
+    <Card className={`transition-all duration-200 hover:shadow-md dark:bg-card/90 ${getColorClass()}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <h3 className="text-sm font-medium">{title}</h3>
+        <h3 className="text-sm font-medium text-card-foreground">{title}</h3>
         <Icon className="h-5 w-5 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold text-card-foreground">{value}</div>
         {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
         {trend && (
           <div className={`flex items-center mt-2 ${getTrendClass()}`}>

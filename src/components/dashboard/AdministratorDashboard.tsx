@@ -80,7 +80,7 @@ export default function AdministratorDashboard() {
       className="p-4 sm:p-6 max-w-7xl mx-auto"
     >
       <motion.div className="mb-6 sm:mb-8" variants={itemVariants}>
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Panel de Administración</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Panel de Administración</h1>
         <p className="text-sm sm:text-base text-muted-foreground mt-2">
           Bienvenido al panel de administración. Aquí tienes un resumen del sistema.
         </p>
@@ -135,15 +135,15 @@ export default function AdministratorDashboard() {
         {quickLinks.map((link, index) => (
           <motion.div key={link.title} variants={itemVariants}>
             <Link href={link.href}>
-              <Card className="hover:bg-accent/50 transition-colors h-full border-2 hover:border-primary/50">
+              <Card className="hover:bg-accent/50 dark:hover:bg-accent/30 transition-colors h-full border-2 hover:border-primary/50 dark:border-border/40 bg-card dark:bg-card/90">
                 <CardHeader className="p-4 sm:p-6">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
+                    <div className="p-2 bg-primary/10 dark:bg-primary/20 rounded-lg">
                       <link.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <CardTitle className="text-base sm:text-lg">{link.title}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg text-card-foreground">{link.title}</CardTitle>
                   </div>
-                  <CardDescription className="text-sm sm:text-base mt-2">{link.description}</CardDescription>
+                  <CardDescription className="text-sm sm:text-base mt-2 text-muted-foreground">{link.description}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>
