@@ -11,7 +11,6 @@ import { StatCard } from "@/components/ui/stat-card";
 import {
   GraduationCap,
   Calendar,
-  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -78,19 +77,13 @@ export default function CoordinatorDashboard() {
       icon: Calendar,
       href: "/dashboard/coordinator/accompaniments",
     },
-    {
-      title: "Asignaturas",
-      description: "Administrar asignaturas",
-      icon: BookOpen,
-      href: "/dashboard/coordinator/subjects",
-    },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Panel de Coordinador</h1>
-        <p className="text-muted-foreground">
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold text-foreground dark:text-foreground">Panel de Coordinador</h1>
+        <p className="text-muted-foreground dark:text-muted-foreground">
           Gestión y seguimiento de acompañamientos
         </p>
       </div>
@@ -101,16 +94,18 @@ export default function CoordinatorDashboard() {
           value={stats.teachers}
           icon={GraduationCap}
           description="Profesores registrados"
+          color="primary"
         />
         <StatCard
           title="Acompañamientos Realizados"
           value={stats.completedAccompaniments}
           icon={Calendar}
           description="Total de acompañamientos"
+          color="secondary"
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         {quickLinks.map((link, index) => (
           <motion.div
             key={link.title}
@@ -119,13 +114,13 @@ export default function CoordinatorDashboard() {
             animate="visible"
           >
             <Link href={link.href}>
-              <Card className="h-full hover:bg-accent/50 dark:hover:bg-accent/30 transition-colors bg-card dark:bg-card/90">
+              <Card className="h-full hover:bg-accent/50 dark:hover:bg-accent/30 transition-colors duration-200 bg-card dark:bg-card/90 border-border dark:border-border/50">
                 <CardHeader>
                   <div className="flex items-center gap-2">
-                    <link.icon className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg text-card-foreground">{link.title}</CardTitle>
+                    <link.icon className="h-5 w-5 text-muted-foreground dark:text-muted-foreground/80" />
+                    <CardTitle className="text-lg text-card-foreground dark:text-card-foreground">{link.title}</CardTitle>
                   </div>
-                  <CardDescription className="text-muted-foreground">{link.description}</CardDescription>
+                  <CardDescription className="text-muted-foreground dark:text-muted-foreground/80">{link.description}</CardDescription>
                 </CardHeader>
               </Card>
             </Link>

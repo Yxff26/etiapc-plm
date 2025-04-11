@@ -1,8 +1,23 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
+import mongoose, { Schema, Document } from 'mongoose';
+import { z } from 'zod';
 
-const userSchema = new mongoose.Schema(
-  {
+// Esquema de validación con Zod
+export const UserSchema = z.object({
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  role: z.enum(['teacher', 'coordinator', 'administrator']),
+  status: z.enum(['active', 'inactive']).default('active'),
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
+});
+
+export type UserType = z.infer<typeof UserSchema>;
+
+// Interfaz de Mongoose
+interface IUser extends Document, UserType {}
+
+const userSchema = new Schema<IUser>({
     firstName: {
       type: String,
       required: [true, "El nombre es requerido"],
@@ -10,7 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     lastName: {
       type: String,
-      required: [false  , "El apellido es requerido"],
+    required: [false, "El apellido es requerido"],
       trim: true,
     },
     email: {
@@ -19,6 +34,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      index: true
     },
     password: {
       type: String,
@@ -33,6 +49,11 @@ const userSchema = new mongoose.Schema(
       default: "teacher",
       required: true,
     },
+  status: { 
+    type: String, 
+    default: 'active',
+    enum: ['active', 'inactive']
+  },
     isEmailVerified: {
       type: Boolean,
       default: false,
@@ -62,21 +83,32 @@ const userSchema = new mongoose.Schema(
       enum: ["local", "google"],
       default: "local",
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  {
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+}, {
     timestamps: true,
+  toJSON: {
+    transform: (doc, ret) => {
+      delete ret.password;
+      return ret;
+    }
   }
-);
-
-// Virtual para obtener el nombre completo
-userSchema.virtual('fullName').get(function() {
-  return `${this.firstName} ${this.lastName}`;
 });
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+// Índices para mejorar el rendimiento de las consultas
+userSchema.index({ role: 1 });
+userSchema.index({ status: 1 });
 
+// Middleware para actualizar updatedAt
+userSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+// Método para validar el esquema
+userSchema.methods.validateSchema = function() {
+  return UserSchema.safeParse(this.toObject());
+};
+
+const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
 export default User;

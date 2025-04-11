@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ETIAPC PLM - Sistema de Gestión de Acompañamiento Docente
 
-## Getting Started
+Sistema de gestión para el seguimiento y acompañamiento docente en el marco del Programa de Liderazgo y Mejora de la Educación (PLM).
 
-First, run the development server:
+## Características Principales
 
+- Autenticación con Google y credenciales locales
+- Gestión de roles (Docente, Coordinador, Administrador)
+- Sistema de acompañamiento docente
+- Evaluaciones y seguimiento
+- Dashboard con métricas y estadísticas
+- Notificaciones en tiempo real
+
+## Requisitos Previos
+
+- Node.js 18.x o superior
+- MongoDB Atlas o MongoDB local
+- Cuenta de Google para OAuth
+- Cuenta de Gmail para notificaciones
+
+## Instalación
+
+1. Clonar el repositorio:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/tu-usuario/etiapc-plm.git
+cd etiapc-plm
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Instalar dependencias:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Configurar variables de entorno:
+```bash
+cp .env.example .env.local
+```
+Editar `.env.local` con tus credenciales.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Iniciar el servidor de desarrollo:
+```bash
+npm run dev
+```
 
-## Learn More
+## Estructura del Proyecto
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/              # Rutas y páginas de Next.js
+├── components/       # Componentes React
+├── models/          # Modelos de MongoDB
+├── types/           # Definiciones de TypeScript
+├── utils/           # Utilidades y helpers
+└── lib/             # Configuraciones y servicios
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Despliegue
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Vercel (Recomendado)
 
-## Deploy on Vercel
+1. Crear una cuenta en [Vercel](https://vercel.com)
+2. Conectar con tu repositorio de GitHub
+3. Configurar las variables de entorno
+4. Desplegar
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Configuración de Producción
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Asegúrate de configurar las siguientes variables de entorno:
+  - `MONGODB_URI`
+  - `NEXTAUTH_SECRET`
+  - `NEXTAUTH_URL`
+  - `GOOGLE_CLIENT_ID`
+  - `GOOGLE_CLIENT_SECRET`
+  - `EMAIL_USER`
+  - `EMAIL_PASS`
+
+## Contribución
+
+1. Fork el proyecto
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
+
+## Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+
+## Contacto
+
+Para soporte o consultas, contactar a:
+- Email: soporte@etiapc.edu.ar
+- Sitio web: [www.etiapc.edu.ar](https://www.etiapc.edu.ar)
