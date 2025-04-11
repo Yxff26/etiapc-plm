@@ -7,6 +7,9 @@ import axios from "axios"
 import { toast } from "sonner"
 import { Calendar, BookOpen, BarChart as BarChartIcon, User } from "lucide-react"
 
+// version1
+// author Yxff
+
 interface DashboardStats {
   totalAcompanamientos: number
   promedioGeneral: number

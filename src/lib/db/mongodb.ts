@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import mongoose from "mongoose";
 
 declare global {

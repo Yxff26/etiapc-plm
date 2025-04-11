@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import "next-auth";
 
 declare module "next-auth" {

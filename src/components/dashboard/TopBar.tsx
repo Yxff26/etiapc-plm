@@ -15,6 +15,9 @@ import Link from "next/link"
 import { Switch } from "@/components/ui/switch"
 import { useTheme } from "next-themes"
 
+// version1
+// author Yxff
+
 // Simulación de rol de usuario - en una aplicación real, esto vendría de tu sistema de autenticación
 type UserRole = "teacher" | "coordinator" | "administrator"
 

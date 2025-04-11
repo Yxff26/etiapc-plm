@@ -6,6 +6,9 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
+// version1
+// author Yxff
+
 type UserRole = "teacher" | "coordinator" | "administrator"
 
 export default function DashboardLayout({

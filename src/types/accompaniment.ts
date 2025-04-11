@@ -1,3 +1,6 @@
+// version1
+// author Yxff
+
 export interface Acompanamiento {
   id: string;
   fecha: Date;

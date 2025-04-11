@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";

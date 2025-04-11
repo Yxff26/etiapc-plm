@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import { Loader2 } from "lucide-react"
 
 export default function DashboardLoading() {

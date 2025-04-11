@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({

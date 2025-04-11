@@ -8,6 +8,9 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 
+// version1
+// author Yxff
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {

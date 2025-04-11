@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import { connectDB } from "@/lib/db/mongodb";
 import User from "@/models/user";
 import NextAuth from "next-auth";

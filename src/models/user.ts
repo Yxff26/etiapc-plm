@@ -1,6 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { z } from 'zod';
 
+// version1
+// author Yxff
+
 // Esquema de validación con Zod
 export const UserSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),

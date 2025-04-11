@@ -25,6 +25,9 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 
+// version1
+// author Yxff
+
 // Tipo de rol basado en el modelo de usuario
 type UserRole = "teacher" | "coordinator" | "administrator"
 

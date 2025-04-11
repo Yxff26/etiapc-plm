@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import { AxiosError } from 'axios';
 
 export class APIError extends Error {

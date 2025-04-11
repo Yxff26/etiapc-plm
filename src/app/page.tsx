@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 "use client";
 import Header from "@/components/home/Header";
 import Hero from "@/components/home/Hero";

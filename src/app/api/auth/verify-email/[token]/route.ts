@@ -1,3 +1,5 @@
+// version1
+// author Yxff
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db/mongodb";
 import User from "@/models/user";

@@ -3,6 +3,9 @@
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/lib/theme-provider";
 
+// version1
+// author Yxff
+
 interface Props {
   children: React.ReactNode;
 }
